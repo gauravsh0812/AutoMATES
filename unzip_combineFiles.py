@@ -56,14 +56,24 @@ for index, zipfile in enumerate(os.listdir()):
             with open(mf) as main:
                 main_lines = main.readlines()
             
-            for f in main_file:
-                for n in range(len(files[f])):
-                    main_line_index = files[f][n][0]
-                    file_to_replace = files[f][n][1]
-                    with open(file_to_replace) as ftr:
-                        ftr_lines = ftr.readlines()
+            for n in range(len(files[f])):
+                main_line_index = files[f][n][0]
+                file_to_replace = files[f][n][1]
                 
-                    mf = mf.replace(main_lines[main_line_index], ftr_lines)
+                # checking index of file_to_replace in the tex_files
+                t_index = tex_files.index('{}.tex'.format(file_to_replace))
+                with open(tex_files[t_index]) as ftr:
+                    ftr_lines = ftr.readlines()
+                
+                f_temp = []
+                for ff_index, ff_line in enumerate(ftr_lines):
+                    if ff_index != main_line_index:
+                        f_temp.append(ff_line)
+                    else:
+                        for iff in ftr_lines:
+                            f_temp.append(iff)
+                    
+                f = f_temp
         
         os.chdir(paper_number)
         src, dst = main_file, "main.tex"
