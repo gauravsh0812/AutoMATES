@@ -94,6 +94,20 @@ for index, zipfile in enumerate(os.listdir()):
                     new_value = [i for i in old_value if i != keys]
                     files[CallingFile] = new_value
                     i-=1
+        # re-writing the main file --> expanding all the list
+        main_new = []
+        with open (rem_keys[0], 'r') as main_new:
+            main_new_lines = main_new.readlines
+        for mnl in main_new_lines:
+            if type(mnl) == list:
+                for l in mnl:
+                    main_new.append(mnl)
+            else:
+                main_new.append(mnl)
+        
+        os.chdir(fldr_path)
+        with open("main_new.tex", 'w') as main:
+            json.dump(main_new, main, indent=4) 
         
     else:
         # rename the only tex file as main.tex
