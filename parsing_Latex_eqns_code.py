@@ -27,16 +27,16 @@ matrix_cmds   = ['{matrix}', '{matrix*}', '{bmatrix}', '{bmatrix*}', '{Bmatrix}'
 equation_cmds = ['{equation}', '{equation*}', '{align}', '{align*}', '{eqnarray}', '{eqnarray*}', '{displaymath}']
 
 # get symbols and greek letter 
-
-df = pd.read_excel(r'C:\Users\gaura\OneDrive\Desktop\AutoMATES\REPO\Latex_symbols.xlsx', 'rel_optr')
+excel_file = '/home/gauravs/Automates/automates_scripts_new/automates_scripts/Latex_symbols.xlsx'
+df = pd.read_excel(excel_file, 'rel_optr')
 relational_operators = df.iloc[:, 1].values.tolist()
-df_greek = pd.read_excel(r'C:\Users\gaura\OneDrive\Desktop\AutoMATES\REPO\Latex_symbols.xlsx', 'greek')
+df_greek = pd.read_excel(excel_file, 'greek')
 greek_letters = df_greek.iloc[:, 0].values.tolist()
 
-
-n_papers = 6
-# looping through the papers
-for n_paper in range(5, n_papers):
+# looping through the latex paper directories
+dir_path = '/home/gauravs/Automates/LaTeX_src/single_tex_1401'
+os.chdir(dir_path)
+for tex_folder in os.listdir(dir_path):
     
     # to find inline equations i.e. $(...)$
     def inline(length, line):
@@ -244,7 +244,8 @@ for n_paper in range(5, n_papers):
 #            elif Dir.split(".")[1] == "cls":
 #                    LaTeX_doc = Dir
 #    
-    Tex_doc = r'C:\Users\gaura\OneDrive\Desktop\AutoMATES\latex_source\paper{}\main.tex'.format(n_paper)
+    tex_file = [file for file in os.listdir(tex_folder)]
+    Tex_doc = tex_file[0]
     file = open(Tex_doc, 'rb')
     lines = file.readlines()
     
@@ -438,13 +439,13 @@ for n_paper in range(5, n_papers):
             src_latex.append(cleaned_eq) 
                 
     # creating and dumping the output file for each paper seperately --> src_latex as json file
-    paper_dir = r'C:\Users\gaura\OneDrive\Desktop\AutoMATES\REPO\results_file\paper{}'.format(n_paper)
+    paper_dir = '/home/gauravs/Automates/results_file/{}'.format(tex_folder)
     call(['mkdir', paper_dir])
     
-    with open(r'C:\Users\gaura\OneDrive\Desktop\AutoMATES\REPO\results_file\paper{}\src_latex_paper{}.txt'.format(n_paper, n_paper), 'w') as file:
+    with open('/home/gauravs/Automates/results_file/{}/latex_equations.txt'.format(tex_folder), 'w') as file:
         json.dump(src_latex, file, indent = 4)
     
     # creating a file and dumping "/DeclareMathOperator" for each paper
-    with open(r'C:\Users\gaura\OneDrive\Desktop\AutoMATES\REPO\results_file\paper{}\DeclareMathOperator_paper{}.txt'.format(n_paper, n_paper), 'w') as file:
-        json.dump(src_latex, file, indent = 4)
+    with open('/home/gauravs/Automates/results_file/{}/DeclareMathOperator_paper.txt'.format(tex_folder), 'w') as file:
+        json.dump(declare_math_operator, file, indent = 4)
     
