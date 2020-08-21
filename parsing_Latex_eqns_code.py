@@ -10,7 +10,7 @@ NOTE: Please change the paths as per your system before running the code.
 """
 
 import pandas as pd
-import json
+import json, os
 from subprocess import call
 
 ##########################################################################################################################################
@@ -440,7 +440,8 @@ for tex_folder in os.listdir(dir_path):
                 
     # creating and dumping the output file for each paper seperately --> src_latex as json file
     paper_dir = '/home/gauravs/Automates/results_file/{}'.format(tex_folder)
-    call(['mkdir', paper_dir])
+    if not os.path.exists(paper_dir):
+        call(['mkdir', paper_dir])
     
     with open('/home/gauravs/Automates/results_file/{}/latex_equations.txt'.format(tex_folder), 'w') as file:
         json.dump(src_latex, file, indent = 4)
