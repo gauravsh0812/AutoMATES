@@ -223,7 +223,7 @@ for tex_folder in os.listdir(dir_path):
         mathml_output_arr.append(mathml_output)
         latexCode_arr.append(latex_code)
     
-    def List_to_Str(eqn):
+    def List_to_Str(eqn, encoding):
         if type(eqn) is not list:
             print(type(eqn))
             return list
@@ -231,7 +231,7 @@ for tex_folder in os.listdir(dir_path):
             # initialize an empty string
             s = ""
             for ele in eqn:
-                ele = ele.decode("utf-8")
+                ele = ele.decode(encoding, errors = "ignore")#("utf-8")
                 s += ele
             return s
     
@@ -246,6 +246,10 @@ for tex_folder in os.listdir(dir_path):
 #    
     tex_file = [file for file in os.listdir(tex_folder)]
     Tex_doc = tex_file[0]
+    # Finding the type of encoding i.e. utf-8, ISO8859-1, ASCII, etc.
+    m = magic.Magic(uncompress = True)
+    encoding = m.from_file(Tex_doc).split(",")[1].split()[0]
+    
     file = open(Tex_doc, 'rb')
     lines = file.readlines()
     
@@ -262,7 +266,7 @@ for tex_folder in os.listdir(dir_path):
     
     # since lines are in bytes, we need to convert them into str    
     for index, l in enumerate(lines):
-        line = l.decode("utf-8", errors = 'ignore')
+        line = l.decode(encoding, errors = 'ignore')#"utf-8", errors = 'ignore')
         
         # extracting MACROS
         if "\\newcommand" in line or "\\renewcommand" in line:
@@ -295,7 +299,7 @@ for tex_folder in os.listdir(dir_path):
                 # combine the lines 
                 dol = 1
                 while dol<6: #dollar != 0:
-                    line = line + lines[index + dol].decode("utf-8", errors = 'ignore')
+                    line = line + lines[index + dol].decode(encoding, errors = "ignore") #("utf-8", errors = 'ignore')
                     if "$$" in line:
                         line = line.replace("$$", "$") 
                         
@@ -329,7 +333,7 @@ for tex_folder in os.listdir(dir_path):
                 # combine the lines 
                 br = 1
                 while brac != 0:
-                    line = line + lines[index + br].decode("utf-8", errors = 'ignore')
+                    line = line + lines[index + br].decode(encoding, errors = "ignore")#("utf-8", errors = 'ignore')
                     length_begin = len([c for c in line if c=="\\["])
                     length_end = len([c for c in line if c=="\\]"])
                     if length_begin == length_end:
@@ -355,7 +359,7 @@ for tex_folder in os.listdir(dir_path):
                 # combine the lines 
                 br = 1
                 while brac != 0:
-                    line = line + lines[index + br].decode("utf-8", errors = 'ignore')
+                    line = line + lines[index + br].decode(encoding, errors = "ignore")#("utf-8", errors = 'ignore')
                     length_begin = len([c for c in line if c=="\\("])
                     length_end = len([c for c in line if c=="\\)"])
                     if length_begin == length_end:
@@ -388,7 +392,7 @@ for tex_folder in os.listdir(dir_path):
                 equation = lines[begin_index_alpha : end_index_alpha]
                 eqn = ''
                 for i in range(len(equation)):
-                    eqn = eqn + equation[i].decode('utf-8')
+                    eqn = eqn + equation[i].decode(encoding, errors = "ignore")#('utf-8')
                 total_equations.append(eqn)
         
    
@@ -415,7 +419,7 @@ for tex_folder in os.listdir(dir_path):
     eq=[]
     for e in total_equations:
         if type(e) is list:
-            eq.append(List_to_Str(e))
+            eq.append(List_to_Str(e, encoding))
         else:
             eq.append(e)
     
