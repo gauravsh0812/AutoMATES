@@ -4,33 +4,29 @@ Created on Tue Aug 11 15:48:11 2020
 
 @author: gaura
 
-Unzipping tex files and combining preamble and main tex file 
+Unzipping tex files and combining preamble and main tex file
 """
 import os
 import json
-from subprocess import call, run
+from subprocess import call
 
 # path to the directory having zip files
-dir_zip = r"C:\Users\gaura\OneDrive\Desktop\AutoMATES\latex_source\paper1"
-os.chdir(dir_zip)
+dir_zip =  "/home/gauravs/Automates/LaTeX_src"
+zip_folder = os.path.join(dir_zip, "1401")
+os.chdir(zip_folder)
+#folder_dir = "/home/gauravs/Automates/LaTeX_src"
 
-# unzipping the tar files
-for index, zipfile in enumerate(os.listdir()):
-    
-#    # create directory as paper#
-#    paper_number = os.join.path(dir_zip, 'paper{}'.format(index))
-#    call(['mkdir', paper_number])
-#    os.chdir(paper_number)
-#    
-#    # changing the format
-#    zipfile_new = '{}.tar.gz'.format(zipfile)
-#    run(['mv', zipfile, zipfile_new])
-#    
-#    # unzipping the tar file
-#    run(['tar -xvzf {}'].format(zipfile_new))
-    
+# reading the zip_files
+
+for fldr in os.listdir(zip_folder):
+    print(fldr)
+    fldr_path = os.path.join(zip_folder, fldr)
+    os.chdir(fldr_path)
+
+#fldr_path = "/home/gauravs/Automates/LaTeX_src/1401/1401.3518"
 # combining the preamble, bibtex, and main tex file --> reanme them main.tex
-    # total number of tex files
+   # total number of tex files
+
     tex_files = [file for file in os.listdir() if '.tex' in file]
     
     if len(tex_files) > 1:
