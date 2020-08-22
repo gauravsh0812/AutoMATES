@@ -248,7 +248,7 @@ for tex_folder in os.listdir(dir_path):
     Tex_doc = tex_file[0]
     # Finding the type of encoding i.e. utf-8, ISO8859-1, ASCII, etc.
     unknown_encoding_tex = []
-    encoding = subprocess.check_output(["file", "-i",file ]).decode("utf-8").split()[2].split("=")[1]
+    encoding = subprocess.check_output(["file", "-i",Tex_doc ]).decode("utf-8").split()[2].split("=")[1]
     print(encoding)
 
     if "unknown" not in encoding:
