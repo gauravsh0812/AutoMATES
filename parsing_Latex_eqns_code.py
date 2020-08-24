@@ -221,7 +221,7 @@ for tex_folder in os.listdir(dir_path):
                 print(emc)
                 
                 if bmc in eqn_2:
-                    indicator = True
+                    indicator_bmc = True
                     bmc_index = eqn_2.find(bmc)
                     emc_index = eqn_2.find(emc)
                     len_mc = len(mc)
@@ -242,7 +242,7 @@ for tex_folder in os.listdir(dir_path):
                         if eqn_2[los] == "&" and los not in index_nochange:
                             eqn_2[los] = ''
                 
-            if not indicator:
+            if not indicator_bmc:
                 eqn_2=eqn_2.replace('&', '')
         
         return eqn_2
