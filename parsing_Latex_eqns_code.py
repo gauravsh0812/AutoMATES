@@ -26,12 +26,18 @@ from subprocess import call
 matrix_cmds   = ['{matrix}', '{matrix*}', '{bmatrix}', '{bmatrix*}', '{Bmatrix}', '{Bmatrix*}', '{vmatrix}', '{vmatrix*}', '{Vmatrix}', '{Vmatrix*}']
 equation_cmds = ['{equation}', '{equation*}', '{align}', '{align*}', '{eqnarray}', '{eqnarray*}', '{displaymath}']
 
-# get symbols and greek letter 
+# get symbols, greek letter, and encoding list 
 excel_file = '/home/gauravs/Automates/automates_scripts_new/automates_scripts/Latex_symbols.xlsx'
 df = pd.read_excel(excel_file, 'rel_optr')
 relational_operators = df.iloc[:, 1].values.tolist()
 df_greek = pd.read_excel(excel_file, 'greek')
 greek_letters = df_greek.iloc[:, 0].values.tolist()
+
+# list of the all possible encodings
+ICONV = []
+with open("/home/gauravs/Automates/automates_scripts_new/automates_scripts/iconv_list.xlsx", "r") as iconv:
+    for i in iconv.readlines():
+        ICONV.append(i.replace("\\n", ""))
 
 # looping through the latex paper directories
 dir_path = '/home/gauravs/Automates/LaTeX_src/single_tex_1401'
@@ -274,7 +280,7 @@ for tex_folder in os.listdir(dir_path):
     encoding = subprocess.check_output(["file", "-i",Tex_doc ]).decode("utf-8").split()[2].split("=")[1]
     print(encoding)
 
-    if "unknown" not in encoding:
+    if encoding in ICONV:
         file = open(Tex_doc, 'rb')
         lines = file.readlines()
 
