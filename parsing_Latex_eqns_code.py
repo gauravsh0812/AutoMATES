@@ -25,6 +25,8 @@ from subprocess import call
 '''
 matrix_cmds   = ['{matrix}', '{matrix*}', '{bmatrix}', '{bmatrix*}', '{Bmatrix}', '{Bmatrix*}', '{vmatrix}', '{vmatrix*}', '{Vmatrix}', '{Vmatrix*}']
 equation_cmds = ['{equation}', '{equation*}', '{align}', '{align*}', '{eqnarray}', '{eqnarray*}', '{displaymath}']
+# unknown encoding type
+unknown_iconv = ["unknown-8bits", "binary"]
 
 # get symbols, greek letter, and encoding list 
 excel_file = '/home/gauravs/Automates/automates_scripts_new/automates_scripts/Latex_symbols.xlsx'
@@ -34,10 +36,10 @@ df_greek = pd.read_excel(excel_file, 'greek')
 greek_letters = df_greek.iloc[:, 0].values.tolist()
 
 # list of the all possible encodings
-ICONV = []
-with open("/home/gauravs/Automates/automates_scripts_new/automates_scripts/iconv_list.xlsx", "r") as iconv:
-    for i in iconv.readlines():
-        ICONV.append(i.replace("\\n", ""))
+#ICONV = []
+#with open("/home/gauravs/Automates/automates_scripts_new/automates_scripts/iconv_list.xlsx", "r") as iconv:
+ #   for i in iconv.readlines():
+  #      ICONV.append(i.replace("\\n", ""))
 
 # looping through the latex paper directories
 dir_path = '/home/gauravs/Automates/LaTeX_src/single_tex_1401'
@@ -280,7 +282,7 @@ for tex_folder in os.listdir(dir_path):
     encoding = subprocess.check_output(["file", "-i",Tex_doc ]).decode("utf-8").split()[2].split("=")[1]
     print(encoding)
 
-    if encoding in ICONV:
+    if encoding not in unknown_iconv::
         file = open(Tex_doc, 'rb')
         lines = file.readlines()
 
@@ -479,15 +481,15 @@ for tex_folder in os.listdir(dir_path):
                 src_latex.append(cleaned_eq) 
 
         # creating and dumping the output file for each paper seperately --> src_latex as json file
-        paper_dir = '/home/gauravs/Automates/results_file/{}'.format(tex_folder)
+        paper_dir = '/home/gauravs/Automates/results_file/latex_equations/{}'.format(tex_folder)
         if not os.path.exists(paper_dir):
             call(['mkdir', paper_dir])
 
-        with open('/home/gauravs/Automates/results_file/{}/latex_equations.txt'.format(tex_folder), 'w') as file:
+        with open('/home/gauravs/Automates/results_file/latex_equations/{}/latex_equations.txt'.format(tex_folder), 'w') as file:
             json.dump(src_latex, file, indent = 4)
 
         # creating a file and dumping "/DeclareMathOperator" for each paper
-        with open('/home/gauravs/Automates/results_file/{}/DeclareMathOperator_paper.txt'.format(tex_folder), 'w') as file:
+        with open('/home/gauravs/Automates/results_file/latex_equations/{}/DeclareMathOperator_paper.txt'.format(tex_folder), 'w') as file:
             json.dump(declare_math_operator, file, indent = 4)
     
     # if tex has unknown encoding or which can not be converted to some known encoding
