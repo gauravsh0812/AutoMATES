@@ -213,7 +213,7 @@ for tex_folder in os.listdir(dir_path):
         
         # we don't want "&" in the equation as such untill unless it is a matrix
         if "&" in eqn_2:
-            indicator = False
+            indicator_bmc = False
             for mc in matrix_cmds:
                 bmc = "\\begin{}".format(mc)
                 print(bmc)
