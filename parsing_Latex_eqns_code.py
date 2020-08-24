@@ -483,5 +483,6 @@ for tex_folder in os.listdir(dir_path):
         with open('/home/gauravs/Automates/results_file/{}/DeclareMathOperator_paper.txt'.format(tex_folder), 'w') as file:
             json.dump(declare_math_operator, file, indent = 4)
     
+    # if tex has unknown encoding or which can not be converted to some known encoding
     else:
         unknown_encoding_tex.append(tex_folder)
