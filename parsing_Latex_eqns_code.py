@@ -339,6 +339,7 @@ for tex_folder in os.listdir(dir_path):
                 else:
                     # combine the lines 
                     dol = 1
+                    dol_indicator = False
                     while dol<6: #dollar != 0:
                         line = line + lines[index + dol].decode(encoding, errors = "ignore") #("utf-8", errors = 'ignore')
                         if "$$" in line:
@@ -348,9 +349,10 @@ for tex_folder in os.listdir(dir_path):
                         if length%2 != 0:
                             dol+=1
                         else: 
-                            dollar = 0
+                            dol = 6
+                            dol_indicator = True
 
-                    if dol<6:
+                    if dol_indicator:
                         inline_equation = inline(length, line)
                         print("$ : {}".format(index))
                     else:
