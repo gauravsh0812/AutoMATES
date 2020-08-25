@@ -181,20 +181,24 @@ for tex_folder in os.listdir(dir_path):
         
         keywords_tobeCleaned = ["\\label", "\\text", "\\intertext"]
         for KC in keywords_tobeCleaned:
-            if KC in eqn_1:
-                p = 0
-                while p == 0:
-                    b = eqn_1.find(KC)
-                    count = 1
-                    k = 5
-                    while count != 0:
-                        if eqn_1[b+k] == "}":
-                            count = 0 
-                        else: 
-                            k+=1
-                    eqn_1 = eqn_1.replace(eqn_1[b:b+k+1], '')
-                    if KC not in eqn_1:
-                        p = 1
+            try:
+                if KC in eqn_1:
+                    p = 0
+                    while p == 0:
+                        b = eqn_1.find(KC)
+                        count = 1
+                        k = 5
+                        while count != 0:
+                            if eqn_1[b+k] == "}":
+                                count = 0 
+                            else: 
+                                k+=1
+                        eqn_1 = eqn_1.replace(eqn_1[b:b+k+1], '')
+                        if KC not in eqn_1:
+                            p = 1
+            
+            except:
+                 print("incorrect equation")
         return eqn_1 
       
     #removing non-essential commands
@@ -337,26 +341,29 @@ for tex_folder in os.listdir(dir_path):
                     inline_equation = inline(length, line)
 
                 else:
-                    # combine the lines 
-                    dol = 1
-                    dol_indicator = False
-                    while dol<6: #dollar != 0:
-                        line = line + lines[index + dol].decode(encoding, errors = "ignore") #("utf-8", errors = 'ignore')
-                        if "$$" in line:
-                            line = line.replace("$$", "$") 
+                    # combine the lines
+                    try:
+                        dol = 1
+                        dol_indicator = False
+                        while dol<6: #dollar != 0:
+                            line = line + lines[index + dol].decode(encoding, errors = "ignore") #("utf-8", errors = 'ignore')
+                            if "$$" in line:
+                                line = line.replace("$$", "$") 
 
-                        length = len([c for c in line if c=="$"])
-                        if length%2 != 0:
-                            dol+=1
-                        else: 
-                            dol = 6
-                            dol_indicator = True
+                            length = len([c for c in line if c=="$"])
+                            if length%2 != 0:
+                                dol+=1
+                            else: 
+                                dol = 6
+                                dol_indicator = True
 
-                    if dol_indicator:
-                        inline_equation = inline(length, line)
-                        print("$ : {}".format(index))
-                    else:
-                        inline_equation = None
+                        if dol_indicator:
+                            inline_equation = inline(length, line)
+                            print("$ : {}".format(index))
+                        else:
+                            inline_equation = None
+                    except:
+                         inline_equation = None
 
                 #check before appending if it is a valid equation
                 if inline_equation is not None:
