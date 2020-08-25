@@ -240,7 +240,7 @@ for tex_folder in os.listdir(dir_path):
                 # anywhere except index_nochange --> replace the "&" with ''   
                     eqn_2_array = eqn_2.split("&")
                     temp = ""
-                    for l in ranage(len(list_of_and_symbol)):
+                    for l in range(len(list_of_and_symbol)):
                         if list_of_and_symbol[l] in index_nochange:
                             temp += eqn_2_array[l] +  eqn_2_array[l+1]
                         else:
