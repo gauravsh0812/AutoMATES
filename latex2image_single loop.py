@@ -50,7 +50,7 @@ def CreatePdf(tex_file, pdf_folder, correct_tex_folder):
     	os.unlink("{}.pdf".format(tex_file.split(".")[0]))
 	else:
 		# copy correct tex documents form the tex_folder to correct_tex_folder
-		src, dst = path_to_tex, os.path.join(correct_tex_folder,tex) 
+		src, dst = path_to_tex, os.path.join(correct_tex_folder,tex_file) 
 		copyfile(src, dst)
 	# removing log and aux file
 	os.unlink("{}.log".format(tex_file.split(".")[0]))
