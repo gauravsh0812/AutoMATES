@@ -109,10 +109,10 @@ for folder in os.listdir(latex_equations):
         eqns = file.readlines()
 	
 	for eqn in eqns:
-		# create tex document for eqn
+	    # create tex document for eqn
 		tex_file = CreateTexDoc(eqn, keyword_dict, tex_folder)
 		# create pdf file
 		pdf_file = CreatePdf(tex_file, pdf_folder, correct_tex_folder)
 		# create image 
 		image_file = CreateImages(pdf_folder, pdf_file, image_folder)
-		
+
