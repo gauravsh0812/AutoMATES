@@ -20,7 +20,7 @@ def template(eqn, DMOineqn):
     # writing tex document for respective eqn 
     temp1 = '\\documentclass{standalone}\n' \
                '\\usepackage{amsmath}\n' \
-               '\\usepackage{amssymb}\n' \
+               '\\usepackage{amssymb}\n' 
     temp2 = '\\begin{document}\n' \
             f'$\\displaystyle {{{{ {eqn} }}}} $\n' \
             '\\end{document}'
