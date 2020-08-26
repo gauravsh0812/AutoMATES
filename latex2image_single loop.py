@@ -47,7 +47,7 @@ def CreatePdf(tex_file, pdf_folder, correct_tex_folder):
 	vakue.communicate()
 	retcode = value.returncode
 	if not retcode == 0:
-    		os.unlink("{}.pdf".format(tex_file.split(".")[0]))
+		os.unlink("{}.pdf".format(tex_file.split(".")[0]))
 	else:
 		# copy correct tex documents form the tex_folder to correct_tex_folder
 		src, dst = path_to_tex, os.path.join(correct_tex_folder,tex_file) 
@@ -81,7 +81,6 @@ latex_correct_equations = os.path.join(base_dir, "latex_correct_equations")
 
 # loop through the folders
 for folder in os.listdir(latex_equations):
-        
     # creating tex, pdf, image folders for each paper
     tex_folder = os.path.join(tex_files, folder)
     pdf_folder = os.path.join(latex_pdf, folder)
