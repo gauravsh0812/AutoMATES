@@ -14,8 +14,13 @@ from shutil import copyfile
 from pdf2image import convert_from_path
 
 # creating a template for tex file
-def template(eqn, k):
+def template(eqn, DMOineqn):
+    # arranging \DeclareMathOpertaor
+    DMOeqn= []
+    for d in DMOineqn:
+        DMOeqn += "{} \n".format(d)
     
+    '''
     temp ='\\documentclass{standalone}\n' \
                '\\usepackage{amsmath}\n' \
                '\\usepackage{amssymb}\n' \
@@ -23,6 +28,16 @@ def template(eqn, k):
                '\\begin{document}\n' \
                f'$\\displaystyle {{{{ {eqn} }}}} $\n' \
                '\\end{document}'
+    '''
+    # writing tex document for respective eqn 
+    temp1 = '\\documentclass{standalone}\n' \
+               '\\usepackage{amsmath}\n' \
+               '\\usepackage{amssymb}\n' \
+    temp2 = '\\begin{document}\n' \
+            f'$\\displaystyle {{{{ {eqn} }}}} $\n' \
+            '\\end{document}'
+    
+    temp = temp1 + DMOeqn + temp2
     return(temp)
 
 # function to create tex documents for each eqn in the folder
