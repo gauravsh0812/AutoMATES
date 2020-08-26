@@ -91,6 +91,7 @@ for folder in os.listdir(latex_equations):
             subprocess.call(['mkdir', f])
    
     # Dealing with "/DeclareMathOperator"
+	path_to_folder = os.path.join(latex_equations, folder)
     DMO_file = os.path.join(path_to_folder, "DeclareMathOperator_paper.txt")
     with open(DMO_file, 'r') as file:
         DMO = file.readline()
