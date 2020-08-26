@@ -48,7 +48,7 @@ def CreateTexDoc(eqns, keyword_dict, tex_folder):
         DeclareMathOperator_in_eqn = [kw for kw in keyword_dict.keys() if kw in eqn]
         # creating tex file
         path_to_tex = os.path.join(tex_folder, "eqn{}".format(index))
-        with open(path, 'w') as f_input:
+        with open(path_to_tex, 'w') as f_input:
             tex_file = f_input.write(template(eqn, DeclareMathOperator_in_eqn))
 
 # create pdf files for the tex documents of the folder
