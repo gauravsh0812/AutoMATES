@@ -58,15 +58,22 @@ def CreatePdf(tex_folder, pdf_folder, correct_tex_folder):
         path_to_tex = os.path.join(tex_folder, tex)
         # calling the tex documnets and running and storing pdf files generated via "pdflatex".
         os.chdir(pdf_folder)
-        value = subprocess.call(['pdflatex', path_to_tex])
-        # removing log and aux file
-        subprocess.call(['del', '{}.aux'.format(index)])
-        subprocess.call(['del', '{}.log'.format(index)])            
+        value = subprocess.Popen(['pdflatex',path_to_tex])
+        value.communicate()
+        retcode = value.returncode
+        if not retcode == 0:
+            os.unlink("{}.pdf".format(tex.split(".")[0]))
+
         # appending correct tex documents
-        if value == 0:
+        else:
             # copy correct tex documents form the tex_folder to correct_tex_folder
-            src, dst = path_to_tex, os.path.join(correct_tex_folder,tex) 
+            src, dst = path_to_tex, os.path.join(correct_tex_folder,tex)
             copyfile(src, dst)
+
+        # removing log and aux file
+        os.unlink("{}.log".format(tex.split(".")[0]))
+        subprocess.call(['del', '{}.aux'.format(tex.split(".")[0])])
+        subprocess.call(['del', '{}.log'.format(tex.split(".")[0])])
     
 # create images of the correct tex documents --> using pdf file 
 def CreateImages(pdf_folder, image_folder):
