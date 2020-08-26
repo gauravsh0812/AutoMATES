@@ -44,7 +44,7 @@ def CreatePdf(tex_file, pdf_folder, correct_tex_folder):
 	# calling the tex documnets and running and storing pdf files generated via "pdflatex".
 	os.chdir(pdf_folder)
 	value = subprocess.Popen(['pdflatex', tex_file])
-	vakue.communicate()
+	value.communicate()
 	retcode = value.returncode
 	if not retcode == 0:
 		os.unlink("{}.pdf".format(tex_file.split(".")[0]))
