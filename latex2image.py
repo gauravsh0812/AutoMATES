@@ -16,7 +16,7 @@ from pdf2image import convert_from_path
 # creating a template for tex file
 def template(eqn, DMOineqn):
     # arranging \DeclareMathOpertaor
-    DMOeqn= []
+    DMOeqn= ''
     for d in DMOineqn:
         DMOeqn += "{} \n".format(d)
     
