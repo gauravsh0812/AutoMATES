@@ -53,7 +53,7 @@ def CreateTexDoc(eqns, keyword_dict, tex_folder):
 
 # create pdf files for the tex documents of the folder
 def CreatePdf(tex_folder, pdf_folder, correct_tex_folder):
-    for index, tex in enumerate(tex_folder):
+    for index, tex in enumerate(os.listdir(tex_folder)):
         # grabbing tex document in tex folder
         path_to_tex = os.path.join(tex_folder, tex)
         # calling the tex documnets and running and storing pdf files generated via "pdflatex".
