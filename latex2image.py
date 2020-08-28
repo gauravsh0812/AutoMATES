@@ -72,8 +72,8 @@ def CreatePdf(tex_folder, pdf_folder, correct_tex_folder):
 
         # removing log and aux file
         os.unlink("{}.log".format(tex.split(".")[0]))
-        subprocess.call(['del', '{}.aux'.format(tex.split(".")[0])])
-        subprocess.call(['del', '{}.log'.format(tex.split(".")[0])])
+        subprocess.call(['rm','-rf', '{}.aux'.format(tex.split(".")[0])])
+        subprocess.call(['rm','-rf', '{}.log'.format(tex.split(".")[0])])
     
 # create images of the correct tex documents --> using pdf file 
 def CreateImages(pdf_folder, image_folder):
