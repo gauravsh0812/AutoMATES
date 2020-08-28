@@ -77,7 +77,7 @@ def CreatePdf(tex_folder, pdf_folder, correct_tex_folder):
     
 # create images of the correct tex documents --> using pdf file 
 def CreateImages(pdf_folder, image_folder):
-    for index, pdf in enumerate(pdf_folder):
+    for index, pdf in enumerate(os.listdir(pdf_folder)):
         # extracting the image of the pdf
         path_to_pdf = os.path.join(pdf_folder, pdf) 
         output_file = '{}'.format(index)
