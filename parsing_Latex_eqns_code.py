@@ -294,7 +294,7 @@ for tex_folder in os.listdir(dir_path):
     encoding = subprocess.check_output(["file", "-i",Tex_doc ]).decode("utf-8").split()[2].split("=")[1]
     print(encoding)
 
-    if encoding not in unknown_iconv::
+    if encoding not in unknown_iconv:
         file = open(Tex_doc, 'rb')
         lines = file.readlines()
 
