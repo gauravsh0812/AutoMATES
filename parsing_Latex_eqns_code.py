@@ -498,14 +498,14 @@ for tex_folder in os.listdir(dir_path):
 
             # Replacing macros with their expanded form
             #macro_eq, indicator = Macros(par_clean_eq, macro_dict)
-            macro_eq= Macros(par_clean_eq, macro_dict)
+            macro_eq, indicator= Macros(par_clean_eq, macro_dict)
 
             # removing unnecc stuff -- if indicator = True i.e. MACROs are in correct format hence got replaced
             # else: par_clean_eq will be send to Clean_eqn_2
-            #if indicator:
-            cleaned_eq = Clean_eqn_2(macro_eq)
-            #else:
-             #   cleaned_eq = Clean_eqn_2(par_clean_eq)
+            if indicator:
+                cleaned_eq = Clean_eqn_2(macro_eq)
+            else:
+                cleaned_eq = Clean_eqn_2(par_clean_eq)
 
             # sending the output to the dictionaries
             if cleaned_eq not in src_latex:
