@@ -12,7 +12,7 @@ NOTE: Please change the paths as per your system before running the code.
 import pandas as pd
 import json, os
 from subprocess import call
-
+import subprocess
 ##########################################################################################################################################
 # Parsing latex equations
 ##########################################################################################################################################
@@ -26,10 +26,11 @@ from subprocess import call
 matrix_cmds   = ['{matrix}', '{matrix*}', '{bmatrix}', '{bmatrix*}', '{Bmatrix}', '{Bmatrix*}', '{vmatrix}', '{vmatrix*}', '{Vmatrix}', '{Vmatrix*}']
 equation_cmds = ['{equation}', '{equation*}', '{align}', '{align*}', '{eqnarray}', '{eqnarray*}', '{displaymath}']
 # unknown encoding type
-unknown_iconv = ["unknown-8bits", "binary"]
+unknown_iconv = ["unknown-8bit", "binary"]
+unknown_encoding_tex = []
 
 # get symbols, greek letter, and encoding list 
-excel_file = '/home/gauravs/Automates/automates_scripts_new/automates_scripts/Latex_symbols.xlsx'
+excel_file = '/home/gauravs/Automates/automates_scripts/Latex_symbols.xlsx'
 df = pd.read_excel(excel_file, 'rel_optr')
 relational_operators = df.iloc[:, 1].values.tolist()
 df_greek = pd.read_excel(excel_file, 'greek')
@@ -203,7 +204,17 @@ for tex_folder in os.listdir(dir_path):
       
     #removing non-essential commands
     def Clean_eqn_2(eqn_2):
-        
+        to_replace = ["\n", "%", "\r", "\\bm", "&&"]
+        for char in to_replace:
+            if char in eqn_2:
+                try:
+                    eqn_2 = eqn_2.replace(char, '')
+                except:
+                    # see if eqn_2 is a tuple
+                    eqn_2 = ' '.join(str(x) for x in eqn_2 if x != char)
+                except:
+                    print("some problem with equation")
+        '''
         if "\n" in eqn_2:
             eqn_2=eqn_2.replace('\n', '')
         if "%" in eqn_2:
@@ -214,7 +225,7 @@ for tex_folder in os.listdir(dir_path):
             eqn_2 =  eqn_2.replace("\\bm", '')
         if "&&" in eqn_2:
             eqn_2=eqn_2.replace('&&', '')
-        
+        '''
         # we don't want "&" in the equation as such untill unless it is a matrix
         if "&" in eqn_2:
             indicator_bmc = False
@@ -287,10 +298,13 @@ for tex_folder in os.listdir(dir_path):
 #            elif Dir.split(".")[1] == "cls":
 #                    LaTeX_doc = Dir
 #    
-    tex_file = [file for file in os.listdir(tex_folder)]
-    Tex_doc = tex_file[0]
+    tex_folder_path = os.path.join(dir_path, tex_folder)
+    os.chdir(tex_folder_path)
+    tex_file = [file for file in os.listdir(tex_folder_path)]
+    Tex_doc = os.path.join(tex_folder_path, tex_file[0])
+
     # Finding the type of encoding i.e. utf-8, ISO8859-1, ASCII, etc.
-    unknown_encoding_tex = []
+    
     encoding = subprocess.check_output(["file", "-i",Tex_doc ]).decode("utf-8").split()[2].split("=")[1]
     print(encoding)
 
