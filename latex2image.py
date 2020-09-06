@@ -14,12 +14,15 @@ from shutil import copyfile
 from pdf2image import convert_from_path
 
 # creating a template for tex file
-def template(eqn, DMOineqn):
+def template(eqn, DMOineqn, Macroineqn):
     # arranging \DeclareMathOpertaor
     DMOeqn= ''
     for d in DMOineqn:
         DMOeqn += "{} \n".format(d)
     
+    Macroeqn= ''
+    for m in Macroineqn:
+        Macroeqn += "{} \n".format(m)
     '''
     temp ='\\documentclass{standalone}\n' \
                '\\usepackage{amsmath}\n' \
@@ -37,19 +40,21 @@ def template(eqn, DMOineqn):
             f'$\\displaystyle {{{{ {eqn} }}}} $\n' \
             '\\end{document}'
     
-    temp = temp1 + DMOeqn + temp2
+    temp = temp1 + Macroeqn + DMOeqn + temp2
     return(temp)
 
 # function to create tex documents for each eqn in the folder
-def CreateTexDoc(eqns, keyword_dict, tex_folder):
+def CreateTexDoc(eqns, keyword_dict, keyword_Macro_dict, tex_folder):
     # creating tex files of the eqns
     for index, eqn in enumerate(eqns):
-        # checking \DeclareMathOperator
+        # checking \DeclareMathOperator and Macros
         DeclareMathOperator_in_eqn = [kw for kw in keyword_dict.keys() if kw in eqn]
+        Macros_in_eqn = [kw for kw in keyword_Macro_dict.keys() if kw in eqn]
         # creating tex file
         path_to_tex = os.path.join(tex_folder, "eqn{}".format(index))
         with open(path_to_tex, 'w') as f_input:
-            tex_file = f_input.write(template(eqn, DeclareMathOperator_in_eqn))
+            tex_file = f_input.write(template(eqn, DeclareMathOperator_in_eqn, Macros_in_eqn))
+            f_input.close()
 
 # create pdf files for the tex documents of the folder
 def CreatePdf(tex_folder, pdf_folder, correct_tex_folder):
@@ -111,9 +116,7 @@ for folder in os.listdir(latex_equations):
                 
     # reading eqns of paper from folder in latex_equations 
     path_to_folder = os.path.join(latex_equations, folder)
-    main_file = os.path.join(path_to_folder, "latex_equations.txt")
-    with open (main_file, 'r') as file:
-        eqns = file.readlines()
+    
     # Dealing with "/DeclareMathOperator"
     DMO_file = os.path.join(path_to_folder, "DeclareMathOperator_paper.txt")
     with open(DMO_file, 'r') as file:
@@ -125,8 +128,37 @@ for folder in os.listdir(latex_equations):
         ibegin, iend = i.find('{'), i.find('}')
         keyword_dict[i[ibegin+1 : iend]] = i
     
-    # calling function to create tex doc for the particular folder --> giving all latex eqns, DMO, and tex_folder path as input
-    CreateTexDoc(eqns, keyword_dict, tex_folder)
+    # Dealing with "Macros"
+    Macro_file = os.path.join(path_to_folder, "Macros_paper.txt")
+    with open(Macro_file, 'r') as file:
+        Macro = file.readline()
+    
+    # initializing /DeclareMathOperator dictionary
+    keyword_Macro_dict={}
+    for i in Macro:
+        ibegin, iend = i.find('{'), i.find('}')
+        keyword_Macro_dict[i[ibegin+1 : iend]] = i
+    
+    # main_file = os.path.join(path_to_folder, "latex_equations.txt")
+    for MF in os.listdir(path_to_folder):
+        if MF != "DeclareMathOperator_paper.txt" or MF!= "Macros_paper.txt":
+            main_file = os.path.join(path_to_folder, MF)
+            with open (main_file, 'r') as file:
+                eqns = file.readlines()
+    '''
+    # Dealing with "/DeclareMathOperator"
+    DMO_file = os.path.join(path_to_folder, "DeclareMathOperator_paper.txt")
+    with open(DMO_file, 'r') as file:
+        DMO = file.readline()
+    
+    # initializing /DeclareMathOperator dictionary
+    keyword_dict={}
+    for i in DMO:
+        ibegin, iend = i.find('{'), i.find('}')
+        keyword_dict[i[ibegin+1 : iend]] = i
+    '''
+            # calling function to create tex doc for the particular folder --> giving all latex eqns, DMO, and tex_folder path as input
+            CreateTexDoc(eqns, keyword_dict, keyword_Macro_dict, tex_folder)
     # create pdf of all the tex document we have just created using pdflatex
     CreatePdf(tex_folder, pdf_folder, correct_tex_folder)
     # create images of correct tex documents
