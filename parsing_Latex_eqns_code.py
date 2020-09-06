@@ -209,9 +209,9 @@ for tex_folder in os.listdir(dir_path):
             if char in eqn_2:
                 try:
                     eqn_2 = eqn_2.replace(char, '')
-                except:
+                #except:
                     # see if eqn_2 is a tuple
-                    eqn_2 = ' '.join(str(x) for x in eqn_2 if x != char)
+                 #   eqn_2 = ' '.join(str(x) for x in eqn_2 if x != char)
                 except:
                     print("some problem with equation")
         '''
@@ -508,7 +508,8 @@ for tex_folder in os.listdir(dir_path):
             # removing unnecc stuff -- if indicator = True i.e. MACROs are in correct format hence got replaced
             # else: par_clean_eq will be send to Clean_eqn_2
             #if indicator:
-            cleaned_eq = Clean_eqn_2(macro_eq)
+            #cleaned_eq = Clean_eqn_2(macro_eq)
+            cleaned_eq = Clean_eqn_2(par_clean_eq)
             #else:
              #   cleaned_eq = Clean_eqn_2(par_clean_eq)
 
