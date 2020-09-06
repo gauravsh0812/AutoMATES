@@ -13,9 +13,11 @@ import subprocess
 from shutil import copyfile
 from pdf2image import convert_from_path
 
+
 # creating a template for tex file
 def template(eqn, DMOineqn, Macroineqn):
     # arranging \DeclareMathOpertaor
+    
     DMOeqn= ''
     for d in DMOineqn:
         DMOeqn += "{} \n".format(d)
@@ -23,6 +25,7 @@ def template(eqn, DMOineqn, Macroineqn):
     Macroeqn= ''
     for m in Macroineqn:
         Macroeqn += "{} \n".format(m)
+    
     '''
     temp ='\\documentclass{standalone}\n' \
                '\\usepackage{amsmath}\n' \
@@ -51,7 +54,7 @@ def CreateTexDoc(eqns, keyword_dict, keyword_Macro_dict, tex_folder):
         DeclareMathOperator_in_eqn = [kw for kw in keyword_dict.keys() if kw in eqn]
         Macros_in_eqn = [kw for kw in keyword_Macro_dict.keys() if kw in eqn]
         # creating tex file
-        path_to_tex = os.path.join(tex_folder, "eqn{}".format(index))
+        path_to_tex = os.path.join(tex_folder, "eqn{}.tex".format(index))
         with open(path_to_tex, 'w') as f_input:
             tex_file = f_input.write(template(eqn, DeclareMathOperator_in_eqn, Macros_in_eqn))
             f_input.close()
@@ -138,6 +141,7 @@ for folder in os.listdir(latex_equations):
     for i in Macro:
         ibegin, iend = i.find('{'), i.find('}')
         keyword_Macro_dict[i[ibegin+1 : iend]] = i
+    
     
     # main_file = os.path.join(path_to_folder, "latex_equations.txt")
     for MF in os.listdir(path_to_folder):
