@@ -315,6 +315,7 @@ for tex_folder in os.listdir(dir_path):
         # initializing the arrays and variables
         src_latex=[]
         macro_dict = {}
+        total_macros = []
         declare_math_operator = []
         total_equations = []
         #MathML_equations = []
@@ -331,6 +332,7 @@ for tex_folder in os.listdir(dir_path):
             if "\\newcommand" in line or "\\renewcommand" in line:
                 var = line[line.find("{")+1 : line.find("}")]
                 macro_dict[var] = line[line.find("}")+1 : ]          
+                total_macros.append(line)
 
             # extract declare math operator
             if "\\DeclareMathOperator" in line:
@@ -489,7 +491,10 @@ for tex_folder in os.listdir(dir_path):
 
         print(eq)
 
-
+        paper_dir = '/home/gauravs/Automates/results_file/latex_equations/{}'.format(tex_folder)
+        if not os.path.exists(paper_dir):
+            call(['mkdir', paper_dir])
+          
         for i in range(len(eq)):
             print(i)
 
@@ -498,30 +503,35 @@ for tex_folder in os.listdir(dir_path):
 
             # Replacing macros with their expanded form
             #macro_eq, indicator = Macros(par_clean_eq, macro_dict)
-            macro_eq, indicator= Macros(par_clean_eq, macro_dict)
+            #macro_eq, indicator= Macros(par_clean_eq, macro_dict)
 
             # removing unnecc stuff -- if indicator = True i.e. MACROs are in correct format hence got replaced
             # else: par_clean_eq will be send to Clean_eqn_2
-            if indicator:
-                cleaned_eq = Clean_eqn_2(macro_eq)
-            else:
-                cleaned_eq = Clean_eqn_2(par_clean_eq)
+            #if indicator:
+            cleaned_eq = Clean_eqn_2(macro_eq)
+            #else:
+             #   cleaned_eq = Clean_eqn_2(par_clean_eq)
 
             # sending the output to the dictionaries
             if cleaned_eq not in src_latex:
                 src_latex.append(cleaned_eq) 
+                with open('/home/gauravs/Automates/results_file/latex_equations/{}/eqn{}_latex_equations.txt'.format(tex_folder, i), 'w') as file:
+                    file.write(cleaned_eq)
 
         # creating and dumping the output file for each paper seperately --> src_latex as json file
-        paper_dir = '/home/gauravs/Automates/results_file/latex_equations/{}'.format(tex_folder)
-        if not os.path.exists(paper_dir):
-            call(['mkdir', paper_dir])
+        #paper_dir = '/home/gauravs/Automates/results_file/latex_equations/{}'.format(tex_folder)
+        #if not os.path.exists(paper_dir):
+        #    call(['mkdir', paper_dir])
 
-        with open('/home/gauravs/Automates/results_file/latex_equations/{}/latex_equations.txt'.format(tex_folder), 'w') as file:
-            json.dump(src_latex, file, indent = 4)
+        #with open('/home/gauravs/Automates/results_file/latex_equations/{}/latex_equations.txt'.format(tex_folder), 'w') as file:
+         #   json.dump(src_latex, file, indent = 4)
 
         # creating a file and dumping "/DeclareMathOperator" for each paper
         with open('/home/gauravs/Automates/results_file/latex_equations/{}/DeclareMathOperator_paper.txt'.format(tex_folder), 'w') as file:
             json.dump(declare_math_operator, file, indent = 4)
+        
+        with open('/home/gauravs/Automates/results_file/latex_equations/{}/DeclareMathOperator_paper.txt'.format(tex_folder), 'w') as file:
+            json.dump(total_macros, file, indent = 4)
     
     # if tex has unknown encoding or which can not be converted to some known encoding
     else:
