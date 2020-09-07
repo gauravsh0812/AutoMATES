@@ -295,6 +295,11 @@ for tex_folder in os.listdir(dir_path):
         dollar = 1
         brac = 1
         
+        # creating the paper folder
+        paper_dir = '/home/gauravs/Automates/results_file/latex_equations/{}'.format(tex_folder)
+        if not os.path.exists(paper_dir):
+            call(['mkdir', paper_dir])
+            
         # opening files to write Macros and declare math operator
         MacroFile = open('/home/gauravs/Automates/results_file/latex_equations/{}/Macros_paper.txt'.format(tex_folder), 'w') 
         DMOFile = open('/home/gauravs/Automates/results_file/latex_equations/{}/DeclareMathOperator_paper.txt'.format(tex_folder), 'w') 
@@ -469,9 +474,7 @@ for tex_folder in os.listdir(dir_path):
 
         print(eq)
 
-        paper_dir = '/home/gauravs/Automates/results_file/latex_equations/{}'.format(tex_folder)
-        if not os.path.exists(paper_dir):
-            call(['mkdir', paper_dir])
+        
           
         for i in range(len(eq)):
             print(i)
