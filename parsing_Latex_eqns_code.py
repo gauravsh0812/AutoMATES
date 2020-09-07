@@ -36,12 +36,6 @@ relational_operators = df.iloc[:, 1].values.tolist()
 df_greek = pd.read_excel(excel_file, 'greek')
 greek_letters = df_greek.iloc[:, 0].values.tolist()
 
-# list of the all possible encodings
-#ICONV = []
-#with open("/home/gauravs/Automates/automates_scripts_new/automates_scripts/iconv_list.xlsx", "r") as iconv:
- #   for i in iconv.readlines():
-  #      ICONV.append(i.replace("\\n", ""))
-
 # looping through the latex paper directories
 dir_path = '/home/gauravs/Automates/LaTeX_src/single_tex_1401'
 os.chdir(dir_path)
@@ -214,18 +208,7 @@ for tex_folder in os.listdir(dir_path):
                  #   eqn_2 = ' '.join(str(x) for x in eqn_2 if x != char)
                 except:
                     print("some problem with equation")
-        '''
-        if "\n" in eqn_2:
-            eqn_2=eqn_2.replace('\n', '')
-        if "%" in eqn_2:
-            eqn_2=eqn_2.replace('%', '')
-        if "\r" in eqn_2:
-            eqn_2=eqn_2.replace('\r', '')
-        if "\\bm" in eqn_2:
-            eqn_2 =  eqn_2.replace("\\bm", '')
-        if "&&" in eqn_2:
-            eqn_2=eqn_2.replace('&&', '')
-        '''
+       
         # we don't want "&" in the equation as such untill unless it is a matrix
         if "&" in eqn_2:
             indicator_bmc = False
@@ -260,9 +243,6 @@ for tex_folder in os.listdir(dir_path):
                             temp += eqn_2_array[l] +  eqn_2_array[l+1]
                         else:
                             temp += eqn_2_array[l] + "&"+ eqn_2_array[l+1]
-                    #for los in list_of_and_symbol:
-                     #   if eqn_2[los] == "&" and los not in index_nochange:
-                      #      eqn_2[los] = ''
                     eqn_2 = temp
                     
             if not indicator_bmc:
@@ -288,16 +268,7 @@ for tex_folder in os.listdir(dir_path):
                 ele = ele.decode(encoding, errors = "ignore")#("utf-8")
                 s += ele
             return s
-    
-    # finding the correct Tex document
-#    DIR = r'C:\Users\gaura\OneDrive\Desktop\AutoMATES\latex_source\paper{}'.format(n_paper)
-#    for Dir in os.listdir(DIR):
-#        if "." in Dir:
-#            if Dir.split(".")[1] == "tex":
-#                Tex_doc = os.path.join(DIR, Dir)
-#            elif Dir.split(".")[1] == "cls":
-#                    LaTeX_doc = Dir
-#    
+       
     tex_folder_path = os.path.join(dir_path, tex_folder)
     os.chdir(tex_folder_path)
     tex_file = [file for file in os.listdir(tex_folder_path)]
@@ -323,20 +294,26 @@ for tex_folder in os.listdir(dir_path):
         matrix = 0
         dollar = 1
         brac = 1
-
+        
+        # opening files to write Macros and declare math operator
+        MacroFile = open('/home/gauravs/Automates/results_file/latex_equations/{}/Macros_paper.txt'.format(tex_folder), 'w') 
+        DMOFile = open('/home/gauravs/Automates/results_file/latex_equations/{}/DeclareMathOperator_paper.txt'.format(tex_folder), 'w') 
+        
         # since lines are in bytes, we need to convert them into str    
         for index, l in enumerate(lines):
-            line = l.decode(encoding, errors = 'ignore')#"utf-8", errors = 'ignore')
+            line = l.decode(encoding, errors = 'ignore')
 
             # extracting MACROS
             if "\\newcommand" in line or "\\renewcommand" in line:
                 var = line[line.find("{")+1 : line.find("}")]
                 macro_dict[var] = line[line.find("}")+1 : ]          
                 total_macros.append(line)
+                MacroFile.write(line)
 
             # extract declare math operator
             if "\\DeclareMathOperator" in line:
                 declare_math_operator.append(line)
+                DMOFile.write(line)
 
             # condition 1.a: if $(....)$ is present
             # condition 1.b: if $$(....)$$ is present --> replace it with $(---)$
@@ -362,7 +339,7 @@ for tex_folder in os.listdir(dir_path):
                         dol = 1
                         dol_indicator = False
                         while dol<6: #dollar != 0:
-                            line = line + lines[index + dol].decode(encoding, errors = "ignore") #("utf-8", errors = 'ignore')
+                            line = line + lines[index + dol].decode(encoding, errors = "ignore") 
                             if "$$" in line:
                                 line = line.replace("$$", "$") 
 
@@ -399,7 +376,7 @@ for tex_folder in os.listdir(dir_path):
                     # combine the lines 
                     br = 1
                     while brac != 0:
-                        line = line + lines[index + br].decode(encoding, errors = "ignore")#("utf-8", errors = 'ignore')
+                        line = line + lines[index + br].decode(encoding, errors = "ignore")
                         length_begin = len([c for c in line if c=="\\["])
                         length_end = len([c for c in line if c=="\\]"])
                         if length_begin == length_end:
@@ -425,7 +402,7 @@ for tex_folder in os.listdir(dir_path):
                     # combine the lines 
                     br = 1
                     while brac != 0:
-                        line = line + lines[index + br].decode(encoding, errors = "ignore")#("utf-8", errors = 'ignore')
+                        line = line + lines[index + br].decode(encoding, errors = "ignore")
                         length_begin = len([c for c in line if c=="\\("])
                         length_end = len([c for c in line if c=="\\)"])
                         if length_begin == length_end:
@@ -458,7 +435,7 @@ for tex_folder in os.listdir(dir_path):
                     equation = lines[begin_index_alpha : end_index_alpha]
                     eqn = ''
                     for i in range(len(equation)):
-                        eqn = eqn + equation[i].decode(encoding, errors = "ignore")#('utf-8')
+                        eqn = eqn + equation[i].decode(encoding, errors = "ignore")
                     total_equations.append(eqn)
 
 
@@ -479,9 +456,10 @@ for tex_folder in os.listdir(dir_path):
                     equation = lines[begin_matrix_index : end_matrix_index+1]
                     total_equations.append(equation)
 
-
+        MacroFile.close()
+        DMOFile.close()
         print(total_equations)
-
+        
         eq=[]
         for e in total_equations:
             if type(e) is list:
@@ -518,6 +496,7 @@ for tex_folder in os.listdir(dir_path):
                 src_latex.append(cleaned_eq) 
                 with open('/home/gauravs/Automates/results_file/latex_equations/{}/eqn{}_latex_equations.txt'.format(tex_folder, i), 'w') as file:
                     file.write(cleaned_eq)
+                    file.close()
 
         # creating and dumping the output file for each paper seperately --> src_latex as json file
         #paper_dir = '/home/gauravs/Automates/results_file/latex_equations/{}'.format(tex_folder)
@@ -528,11 +507,11 @@ for tex_folder in os.listdir(dir_path):
          #   json.dump(src_latex, file, indent = 4)
 
         # creating a file and dumping "/DeclareMathOperator" for each paper
-        with open('/home/gauravs/Automates/results_file/latex_equations/{}/DeclareMathOperator_paper.txt'.format(tex_folder), 'w') as file:
-            json.dump(declare_math_operator, file, indent = 4)
+        #with open('/home/gauravs/Automates/results_file/latex_equations/{}/DeclareMathOperator_paper.txt'.format(tex_folder), 'w') as file:
+         #   json.dump(declare_math_operator, file, indent = 4)
         
-        with open('/home/gauravs/Automates/results_file/latex_equations/{}/DeclareMathOperator_paper.txt'.format(tex_folder), 'w') as file:
-            json.dump(total_macros, file, indent = 4)
+        #with open('/home/gauravs/Automates/results_file/latex_equations/{}/DeclareMathOperator_paper.txt'.format(tex_folder), 'w') as file:
+         #   json.dump(total_macros, file, indent = 4)
     
     # if tex has unknown encoding or which can not be converted to some known encoding
     else:
