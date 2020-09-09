@@ -172,41 +172,44 @@ for tex_folder in os.listdir(dir_path):
             indicator = False
             return(macro_eq, indicator)
     '''
-    def Macros(line):
+    # dealing with Macros
+    def Macros(line):    
+        # checking the brackets
         open_curly_brac = [char for char in line if char == "{"]
-                close_curly_brac = [char for char in line if char == "}"]
-                if len(open_curly_brac)!= len(close_curly_brac):
-                    delta = len(open_curly_brac) - len(close_curly_brac)
-                    #print(line)
-                    #print(delta)
-                    # if delta is positive --> need to close the brac
-                    if delta>0:
-                        for i in range(delta):
-                            line +="}"
-                    if delta < 0:
-                        for i in range(abs(delta)):
-                            line=line[:line.find(max(close_curly_brac))]
-                    #print(line.replace(" ", ""))
+        close_curly_brac = [char for char in line if char == "}"]
+        if len(open_curly_brac)!= len(close_curly_brac):
+            delta = len(open_curly_brac) - len(close_curly_brac)
+            #print(line)
+            #print(delta)
+            # if delta is positive --> need to close the brac
+            if delta>0:
+                for i in range(delta):
+                    line +="}"
+            if delta < 0:
+                for i in range(abs(delta)):
+                    line=line[:line.find(max(close_curly_brac))]
+            #print(line.replace(" ", ""))
 
-                try:
-                    hash_flag = False
-                    line=line.replace(" ", "")
-                    var = [int(line[p+1]) for p, c in enumerate(line) if c == "#"]
-                    if len(var) !=0:
-                       # print(line)
-                        if line[line.find("}")+1] != "[" and line[line.find("}")+3] != "]":
-                            #print(line)
-                            hash_flag = True
-                            max_var = max(var)
-                            #print(max_var)
-                            temp = ""
-                            temp += line[:line.find("}")+1] + "[" + max_var + "]"+ line[line.find("}")+1:]
-                    if hash_flag:
-                        return temp
-                    else:
-                        return line
-                except:
-                    pass
+        try:
+            # dealing with parameters assiging problem
+            hash_flag = False
+            line=line.replace(" ", "")
+            var = [int(line[p+1]) for p, c in enumerate(line) if c == "#"]
+            if len(var) !=0:
+               # print(line)
+                if line[line.find("}")+1] != "[" and line[line.find("}")+3] != "]":
+                    #print(line)
+                    hash_flag = True
+                    max_var = max(var)
+                    #print(max_var)
+                    temp = ""
+                    temp += line[:line.find("}")+1] + "[" + max_var + "]"+ line[line.find("}")+1:]
+            if hash_flag:
+                return temp
+            else:
+                return line
+        except:
+            pass
 
     # cleaning eqn - part 1 --> removing label, text, intertext
     def Clean_eqn_1(eqn_1):
