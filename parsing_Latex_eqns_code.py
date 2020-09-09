@@ -78,6 +78,7 @@ for tex_folder in os.listdir(dir_path):
         
             return(parenthesis)
     
+    '''
     # replacing macros with their expanded form
     def Macros(macro_eq, macro_dict):
          
@@ -170,7 +171,43 @@ for tex_folder in os.listdir(dir_path):
         else:
             indicator = False
             return(macro_eq, indicator)
-    
+    '''
+    def Macros(line):
+        open_curly_brac = [char for char in line if char == "{"]
+                close_curly_brac = [char for char in line if char == "}"]
+                if len(open_curly_brac)!= len(close_curly_brac):
+                    delta = len(open_curly_brac) - len(close_curly_brac)
+                    #print(line)
+                    #print(delta)
+                    # if delta is positive --> need to close the brac
+                    if delta>0:
+                        for i in range(delta):
+                            line +="}"
+                    if delta < 0:
+                        for i in range(abs(delta)):
+                            line=line[:line.find(max(close_curly_brac))]
+                    #print(line.replace(" ", ""))
+
+                try:
+                    hash_flag = False
+                    line=line.replace(" ", "")
+                    var = [int(line[p+1]) for p, c in enumerate(line) if c == "#"]
+                    if len(var) !=0:
+                       # print(line)
+                        if line[line.find("}")+1] != "[" and line[line.find("}")+3] != "]":
+                            #print(line)
+                            hash_flag = True
+                            max_var = max(var)
+                            #print(max_var)
+                            temp = ""
+                            temp += line[:line.find("}")+1] + "[" + max_var + "]"+ line[line.find("}")+1:]
+                    if hash_flag:
+                        return temp
+                    else:
+                        return line
+                except:
+                    pass
+
     # cleaning eqn - part 1 --> removing label, text, intertext
     def Clean_eqn_1(eqn_1):
         
@@ -193,7 +230,8 @@ for tex_folder in os.listdir(dir_path):
                             p = 1
             
             except:
-                 print("incorrect equation")
+                pass
+                
         return eqn_1 
       
     #removing non-essential commands
@@ -207,16 +245,17 @@ for tex_folder in os.listdir(dir_path):
                     # see if eqn_2 is a tuple
                  #   eqn_2 = ' '.join(str(x) for x in eqn_2 if x != char)
                 except:
-                    print("some problem with equation")
+                    pass
+                    #print("some problem with equation")
        
         # we don't want "&" in the equation as such untill unless it is a matrix
         if "&" in eqn_2:
             indicator_bmc = False
             for mc in matrix_cmds:
                 bmc = "\\begin{}".format(mc)
-                print(bmc)
+                #print(bmc)
                 emc = "\\end{}".format(mc) 
-                print(emc)
+                #print(emc)
                 
                 if bmc in eqn_2:
                     indicator_bmc = True
@@ -224,16 +263,16 @@ for tex_folder in os.listdir(dir_path):
                     emc_index = eqn_2.find(emc)
                     len_mc = len(mc)
                     
-                    print([bmc_index, emc_index, len_mc])
+                    #print([bmc_index, emc_index, len_mc])
                 
                     
                 # position of "&" in equation
                     list_of_and_symbol = [index_ for index_ ,char in enumerate(eqn_2) if char == "&"]     
-                    print(list_of_and_symbol)
+                    #print(list_of_and_symbol)
                 # index of the code in between bmc_index to emc_index 
                 # don't need to remove "&" from this part eqn
                     index_nochange = list(range(bmc_index+ 6+ len_mc+ 1, emc_index))
-                    print(index_nochange)
+                    #print(index_nochange)
                     
                 # anywhere except index_nochange --> replace the "&" with ''   
                     eqn_2_array = eqn_2.split("&")
@@ -259,7 +298,7 @@ for tex_folder in os.listdir(dir_path):
     
     def List_to_Str(eqn, encoding):
         if type(eqn) is not list:
-            print(type(eqn))
+            #print(type(eqn))
             return list
         else:
             # initialize an empty string
@@ -277,7 +316,7 @@ for tex_folder in os.listdir(dir_path):
     # Finding the type of encoding i.e. utf-8, ISO8859-1, ASCII, etc.
     
     encoding = subprocess.check_output(["file", "-i",Tex_doc ]).decode("utf-8").split()[2].split("=")[1]
-    print(encoding)
+    #print(encoding)
 
     if encoding not in unknown_iconv:
         file = open(Tex_doc, 'rb')
@@ -285,9 +324,9 @@ for tex_folder in os.listdir(dir_path):
 
         # initializing the arrays and variables
         src_latex=[]
-        macro_dict = {}
-        total_macros = []
-        declare_math_operator = []
+        #macro_dict = {}
+        #total_macros = []
+        #declare_math_operator = []
         total_equations = []
         #MathML_equations = []
         alpha = 0
@@ -310,14 +349,16 @@ for tex_folder in os.listdir(dir_path):
 
             # extracting MACROS
             if "\\newcommand" in line or "\\renewcommand" in line:
-                var = line[line.find("{")+1 : line.find("}")]
-                macro_dict[var] = line[line.find("}")+1 : ]          
-                total_macros.append(line)
-                MacroFile.write(line)
+                L = Macro(line)
+                #var = line[line.find("{")+1 : line.find("}")]
+                #macro_dict[var] = line[line.find("}")+1 : ]
+                #total_macros.append(line)
+                
+                MacroFile.write(L)             
 
             # extract declare math operator
             if "\\DeclareMathOperator" in line:
-                declare_math_operator.append(line)
+                #declare_math_operator.append(line)
                 DMOFile.write(line)
 
             # condition 1.a: if $(....)$ is present
@@ -357,7 +398,7 @@ for tex_folder in os.listdir(dir_path):
 
                         if dol_indicator:
                             inline_equation = inline(length, line)
-                            print("$ : {}".format(index))
+                            #print("$ : {}".format(index))
                         else:
                             inline_equation = None
                     except:
@@ -387,7 +428,7 @@ for tex_folder in os.listdir(dir_path):
                         if length_begin == length_end:
                             Bequations = bracket_equation(line)
 
-                            print(Bequations)
+                            #print(Bequations)
                         else:
                             br+=1
                 #check before appending if it is a valid equation
@@ -450,7 +491,7 @@ for tex_folder in os.listdir(dir_path):
                 if "\\begin{}".format(mc) in line and alpha == 0:
                     matrix = 1
                     begin_matrix_index = index
-                    print("\\begin mat : {}".format(index))
+                    #print("\\begin mat : {}".format(index))
 
                 if "\\end{}".format(mc) in line and matrix == 1:
                     end_matrix_index = index
@@ -463,7 +504,7 @@ for tex_folder in os.listdir(dir_path):
 
         MacroFile.close()
         DMOFile.close()
-        print(total_equations)
+        #print(total_equations)
         
         eq=[]
         for e in total_equations:
@@ -472,12 +513,12 @@ for tex_folder in os.listdir(dir_path):
             else:
                 eq.append(e)
 
-        print(eq)
+        #print(eq)
 
         
           
         for i in range(len(eq)):
-            print(i)
+            #print(i)
 
             # removing unnecc stuff - label, text, intertext
             par_clean_eq = Clean_eqn_1(eq[i])
