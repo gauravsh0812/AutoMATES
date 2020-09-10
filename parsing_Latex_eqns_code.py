@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
+ # -*- coding: utf-8 -*-
 """
 Created on Sat Aug  8 23:02:49 2020
-
 @author: gauravs
-
 Latex eqns Parsing code
-
 NOTE: Please change the paths as per your system before running the code.
 """
 
@@ -112,11 +109,9 @@ for tex_folder in os.listdir(dir_path):
                         ff = macro_in_eqn[m]
                         if ff.find('{') != 0:
                             n_var = int(ff[1]) 
-
                     #check the number of parameter given upfront and grab that parameter 
                         n_var_upfront = (ff.find('{')//3) - 1
                         var_upfront = [ff[1+i*3] for i in range(1, n_var_upfront) if n_var_upfront !=0]
-
                     #check the number of parameter given in the eqn and grab those parameter 
                         n_var_rem = n_var - n_var_upfront
                         n_loop = 0
@@ -131,23 +126,18 @@ for tex_folder in os.listdir(dir_path):
                             var_eqn.append(eq_copy[eq_part1 +1 : eq_part11])
                             eq_copy = eq_copy[eq_part11+1 : ]
                             n_loop+=1
-
                         list_var = var_upfront + var_eqn 
-
                 #make a dictionaries having parameters and there values
                         temp_macro_dict = {}
                         for a_ind, a in enumerate(list_var):
                             temp_macro_dict['#{}'.format(a_ind+1)] = a 
-
                 # replace the macro with the expanded form
                         ff = ff[ff.find('{'): ]    
                         for tmd in temp_macro_dict.keys():
                             if tmd in ff:
                                 ff = ff.replace(tmd, temp_macro_dict[tmd])
-
                         macro_eq = macro_eq.replace(m,ff)
                         indicator = True
-
                     except:
                          print("MACRO are in wrong format")
             
@@ -157,7 +147,6 @@ for tex_folder in os.listdir(dir_path):
                         macro_eq = macro_eq.replace(m, macro_in_eqn[m])
                         #print(m)
                         indicator = True
-
                     except:
                         print("MACRO is in the wrong format")
             
@@ -310,7 +299,21 @@ for tex_folder in os.listdir(dir_path):
                 ele = ele.decode(encoding, errors = "ignore")#("utf-8")
                 s += ele
             return s
-       
+    
+    # writing tex document for respective eqn 
+    def template(DMOeqn, eqn):
+        
+        temp1 = '\\documentclass{standalone}\n' \
+                   '\\usepackage{amsmath}\n' \
+                   '\\usepackage{amssymb}\n' 
+        temp2 = '\\begin{document}\n' \
+                f'$\\displaystyle {{{{ {eqn} }}}} $\n' \
+                '\\end{document}'
+        
+        temp = temp1 + DMOeqn + temp2
+        return temp
+    
+    
     tex_folder_path = os.path.join(dir_path, tex_folder)
     os.chdir(tex_folder_path)
     tex_file = [file for file in os.listdir(tex_folder_path)]
@@ -328,8 +331,8 @@ for tex_folder in os.listdir(dir_path):
         # initializing the arrays and variables
         src_latex=[]
         #macro_dict = {}
-        #total_macros = []
-        #declare_math_operator = []
+        total_macros = []
+        declare_math_operator = []
         total_equations = []
         #MathML_equations = []
         alpha = 0
@@ -343,8 +346,8 @@ for tex_folder in os.listdir(dir_path):
             call(['mkdir', paper_dir])
             
         # opening files to write Macros and declare math operator
-        MacroFile = open('/home/gauravs/Automates/results_file/latex_equations/{}/Macros_paper.txt'.format(tex_folder), 'w') 
-        DMOFile = open('/home/gauravs/Automates/results_file/latex_equations/{}/DeclareMathOperator_paper.txt'.format(tex_folder), 'w') 
+        #MacroFile = open('/home/gauravs/Automates/results_file/latex_equations/{}/Macros_paper.txt'.format(tex_folder), 'w') 
+        #DMOFile = open('/home/gauravs/Automates/results_file/latex_equations/{}/DeclareMathOperator_paper.txt'.format(tex_folder), 'w') 
         
         # since lines are in bytes, we need to convert them into str    
         for index, l in enumerate(lines):
@@ -355,13 +358,12 @@ for tex_folder in os.listdir(dir_path):
                 L = Macro(line)
                 #var = line[line.find("{")+1 : line.find("}")]
                 #macro_dict[var] = line[line.find("}")+1 : ]
-                #total_macros.append(line)
-                
+                total_macros.append(L)
                 MacroFile.write(L)             
 
             # extract declare math operator
             if "\\DeclareMathOperator" in line:
-                #declare_math_operator.append(line)
+                declare_math_operator.append(line)
                 DMOFile.write(line)
 
             # condition 1.a: if $(....)$ is present
@@ -505,8 +507,8 @@ for tex_folder in os.listdir(dir_path):
                     equation = lines[begin_matrix_index : end_matrix_index+1]
                     total_equations.append(equation)
 
-        MacroFile.close()
-        DMOFile.close()
+        #MacroFile.close()
+        #DMOFile.close()
         #print(total_equations)
         
         eq=[]
@@ -563,3 +565,34 @@ for tex_folder in os.listdir(dir_path):
     # if tex has unknown encoding or which can not be converted to some known encoding
     else:
         unknown_encoding_tex.append(tex_folder)
+
+    # create tex file
+
+
+    
+    #DMOeqn= ''
+    #for arr in [declare_math_operator, total_macros]:
+    #    for d in arr:
+    #        DMOeqn += "{} \n".format(d)
+    keyword_Macro_dict={}
+    for i in total_macros:
+        ibegin, iend = i.find('{'), i.find('}')
+        keyword_Macro_dict[i[ibegin+1 : iend]] = i
+        
+    keyword_dict={}
+    for i in declare_math_operator:
+        ibegin, iend = i.find('{'), i.find('}')
+        keyword_dict[i[ibegin+1 : iend]] = i
+        
+    for i, e in enumerate(src_latex):
+        DeclareMathOperator_in_eqn = [v for kw, v in keyword_dict.items() if kw in eqn]
+        Macros_in_eqn = [v for kw, v in keyword_Macro_dict.items() if kw in eqn]
+        DMOeqn= ''
+        for arr in [DeclareMathOperator_in_eqn, Macros_in_eqn]:
+            for d in arr:
+                DMOeqn += "{} \n".format(d)
+        tex = template(DMOeqn, e)
+        with open("/home/gauravs/Automates/results_file/tex_files/{}/eqn{}.tex".format(tex_folder, i)) as texfile:
+            texfile.write(tex)
+            texfile.close()
+
