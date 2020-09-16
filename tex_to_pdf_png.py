@@ -29,7 +29,8 @@ for folder in os.listdir(TexFolderPath):
 
         # copying the tex file to the correct latex eqn directory
         latex_correct_equations_folder = os.path.join(path, f"latex_correct_equations/{folder}")
-        subprocess.call(['mkdir',latex_correct_equations_folder])
+        if not os.path.exists(latex_correct_equations_folder):
+            subprocess.call(['mkdir',latex_correct_equations_folder])
         copyfile(os.path.join(tex_folder,texfile), os.path.join(os.path.join(latex_correct_equations_folder, f"{texfile}")))
 
         try:
