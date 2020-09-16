@@ -563,35 +563,35 @@ for tex_folder in os.listdir(dir_path):
          #   json.dump(total_macros, file, indent = 4)
          
          # create tex file
-    #DMOeqn= ''
-    #for arr in [declare_math_operator, total_macros]:
-    #    for d in arr:
-    #        DMOeqn += "{} \n".format(d)
-    keyword_Macro_dict={}
-    for i in total_macros:
-        ibegin, iend = i.find('{'), i.find('}')
-        keyword_Macro_dict[i[ibegin+1 : iend]] = i
-    
-    # creating tex
-    keyword_dict={}
-    for i in declare_math_operator:
-        ibegin, iend = i.find('{'), i.find('}')
-        keyword_dict[i[ibegin+1 : iend]] = i
-        
-    for i, e in enumerate(src_latex):
-        DeclareMathOperator_in_eqn = [v for kw, v in keyword_dict.items() if kw in e]
-        Macros_in_eqn = [v for kw, v in keyword_Macro_dict.items() if kw in e]
-        DMOeqn= ''
-        for arr in [DeclareMathOperator_in_eqn, Macros_in_eqn]:
-            for d in arr:
-                DMOeqn += "{} \n".format(d)
-        tex = template(DMOeqn, e)
-        tex_path = "/home/gauravs/Automates/results_file/tex_files/{}".format(tex_folder)
-        if not os.path.exists(tex_path):
-            subprocess.call(['mkdir', tex_path])
-        with open("/home/gauravs/Automates/results_file/tex_files/{}/eqn{}.tex".format(tex_folder, i), "w") as texfile:
-            texfile.write(tex)
-            texfile.close()
+        #DMOeqn= ''
+        #for arr in [declare_math_operator, total_macros]:
+        #    for d in arr:
+        #        DMOeqn += "{} \n".format(d)
+        keyword_Macro_dict={}
+        for i in total_macros:
+            ibegin, iend = i.find('{'), i.find('}')
+            keyword_Macro_dict[i[ibegin+1 : iend]] = i
+
+        # creating tex
+        keyword_dict={}
+        for i in declare_math_operator:
+            ibegin, iend = i.find('{'), i.find('}')
+            keyword_dict[i[ibegin+1 : iend]] = i
+
+        for i, e in enumerate(src_latex):
+            DeclareMathOperator_in_eqn = [v for kw, v in keyword_dict.items() if kw in e]
+            Macros_in_eqn = [v for kw, v in keyword_Macro_dict.items() if kw in e]
+            DMOeqn= ''
+            for arr in [DeclareMathOperator_in_eqn, Macros_in_eqn]:
+                for d in arr:
+                    DMOeqn += "{} \n".format(d)
+            tex = template(DMOeqn, e)
+            tex_path = "/home/gauravs/Automates/results_file/tex_files/{}".format(tex_folder)
+            if not os.path.exists(tex_path):
+                subprocess.call(['mkdir', tex_path])
+            with open("/home/gauravs/Automates/results_file/tex_files/{}/eqn{}.tex".format(tex_folder, i), "w") as texfile:
+                texfile.write(tex)
+                texfile.close()
 
   
     # if tex has unknown encoding or which can not be converted to some known encoding
