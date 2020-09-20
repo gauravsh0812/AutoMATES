@@ -1,10 +1,15 @@
+# pdf and png
 import os, subprocess
 from pdf2image import convert_from_path
 from shutil import copyfile
+from func_timeout import func_timeout, FunctionTimedOut
 
-
-# for creating pdf files
-
+# for creating pdf files 
+def run_pdflatex(tex_folder, texfile):
+    command = ['pdflatex','-interaction', 'nonstopmode',os.path.join(tex_folder,texfile)]
+    output = subprocess.run(command)
+    return output
+    
 path = "/home/gauravs/Automates/results_file"
 TexFolderPath = os.path.join(path, "tex_files")
 for folder in os.listdir(TexFolderPath):
@@ -20,21 +25,27 @@ for folder in os.listdir(TexFolderPath):
         subprocess.call(['mkdir', eqn_tex_dst_root])
 
     tex_folder = os.path.join(path, f"tex_files/{folder}")
-    for texfile in os.listdir(tex_folder):
+    for texfile in os.listdir(tex_folder): 
         i = texfile.split(".")[0]
         #print("texfile --> {}".format(texfile))
 
-        command = ['pdflatex','-interaction', 'nonstopmode',os.path.join(tex_folder,texfile)]
-        os.chdir(eqn_tex_dst_root)
-        output = subprocess.run(command)
+        #command = ['pdflatex','-interaction', 'nonstopmode',os.path.join(tex_folder,texfile)]
+        OutFlag = False
+        try:
+            os.chdir(eqn_tex_dst_root)
+            output = func_timeout(5, run_pdflatex, args=(tex_folder, texfile))#subprocess.run(command)
+            OutFlag = True
         #print(output.returncode)
         #if not output == 0:
          #   os.unlink(f'{i}.pdf')
-        os.remove(os.path.join(eqn_tex_dst_root, f'{i}.log'))
+            os.remove(os.path.join(eqn_tex_dst_root, f'{i}.log'))
+        except FunctionTimedOut:
+            print("%s couldn't run within 5 sec"%texfile)
 
         # copying the tex file to the correct latex eqn directory
-        if output.returncode==0:
-            copyfile(os.path.join(tex_folder,texfile), os.path.join(os.path.join(latex_correct_equations_folder, f"{texfile}")))
+        if OutFlag:
+            if output.returncode==0:
+                copyfile(os.path.join(tex_folder,texfile), os.path.join(os.path.join(latex_correct_equations_folder, f"{texfile}")))
 
         try:
             os.remove(os.path.join(eqn_tex_dst_root, f'{i}.aux'))
@@ -71,4 +82,3 @@ for pdf_folder in os.listdir(pdf_directory):
     except:
         print("wrong pdf file")
 '''
-
