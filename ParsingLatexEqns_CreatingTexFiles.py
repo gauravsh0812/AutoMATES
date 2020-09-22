@@ -339,6 +339,8 @@ for tex_folder in os.listdir(dir_path):
         matrix = 0
         dollar = 1
         brac = 1
+        Total_Parsed_Eqn = 0
+
         
         # creating the paper folder
         paper_dir = '/home/gauravs/Automates/results_file/latex_equations/{}'.format(tex_folder)
@@ -546,7 +548,10 @@ for tex_folder in os.listdir(dir_path):
                 with open('/home/gauravs/Automates/results_file/latex_equations/{}/eqn{}_latex_equations.txt'.format(tex_folder, i), 'w') as file:
                     file.write(cleaned_eq)
                     file.close()
-
+        
+        # Total number eqn parsed 
+        Total_Parsed_Eqn += len(src_latex)
+        
         # creating and dumping the output file for each paper seperately --> src_latex as json file
         #paper_dir = '/home/gauravs/Automates/results_file/latex_equations/{}'.format(tex_folder)
         #if not os.path.exists(paper_dir):
