@@ -603,4 +603,4 @@ for tex_folder in os.listdir(dir_path):
     else:
         unknown_encoding_tex.append(tex_folder)
 
-    
+print("Total number equations succesfully parsed --> %d" %Total_Parsed_Eqn)  
