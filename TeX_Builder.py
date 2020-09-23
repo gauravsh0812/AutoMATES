@@ -17,7 +17,7 @@ def template(eqn, Preamble):
     return(temp)
 
 # function to create tex documents for each eqn in the folder
-def CreateTexDoc(eqns, keyword_dict, keyword_Macro_dict, tex_folder, TeX_name):
+def CreateTexDoc(eqn, keyword_dict, keyword_Macro_dict, tex_folder, TeX_name):
    
     # checking \DeclareMathOperator and Macros
     DeclareMathOperator_in_eqn = [kw for kw in keyword_dict.keys() if kw in eqn]
@@ -28,7 +28,7 @@ def CreateTexDoc(eqns, keyword_dict, keyword_Macro_dict, tex_folder, TeX_name):
             Preamble += "{} \n".format(d)
             
     # creating tex file
-    path_to_tex = os.path.join(tex_folder, "eqn{}.tex".format(TeX_name))
+    path_to_tex = os.path.join(tex_folder, "{}.tex".format(TeX_name))
     with open(path_to_tex, 'w') as f_input:
         f_input.write(template(eqn, Preamble))
         f_input.close()
@@ -86,4 +86,4 @@ if __name__ == "__main__":
     # tex_files dumping directory
     tex_files = os.path.join(base_dir, "tex_files")
     
-    main(latex_equations, tex_files, latex_pdf, latex_images, latex_correct_equations)
+    main(latex_equations, tex_files)
