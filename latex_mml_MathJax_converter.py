@@ -35,13 +35,15 @@ def main(eqn_file, mml_path):
 if __name__ == "__main__":
 
     root = "/home/gauravs/Automates/results_file"
-    Latex_strs_json = []
     # path to directory containing correct latex eqns
     folder_correct_latex_eqns = os.path.join(root, "latex_correct_equations")
     # path to directory contain mml eqns
     mml_dir = os.path.join(root, "Mathjax_mml")
 
     for folder in os.listdir(folder_correct_latex_eqns):
+        # array to keep track of the latex eqns 
+        Latex_strs_json = []
+        
         mml_folder = os.path.join(mml_dir, folder)
         # making folder for each each paper
         if not os.path.exists(mml_folder):
