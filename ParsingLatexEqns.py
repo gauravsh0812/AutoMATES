@@ -204,12 +204,13 @@ def Cleaning_writing_eqn(src_latex, total_equations, encoding, tex_folder):
         # sending the output to the dictionaries
         if cleaned_eq not in src_latex:
             src_latex.append(cleaned_eq) 
-            with open('/home/gauravs/Automates/results_file/latex_equations/{}/eqn{}_latex_equations.txt'.format(tex_folder, i), 'w') as file:
+            with open('/home/gauravs/Automates/results_file/latex_equations/{}/eqn{}.txt'.format(tex_folder, i), 'w') as file:
                 file.write(cleaned_eq)
                 file.close()
     return(src_latex)
     
 def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters):
+    Total_Parsed_Eqn = 0
     # looping through the latex paper directories
     dir_path = '/home/gauravs/Automates/LaTeX_src/single_tex_1401'
     for tex_folder in os.listdir(dir_path):
@@ -237,7 +238,6 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
             matrix = 0
             dollar = 1
             brac = 1
-            Total_Parsed_Eqn = 0
 
             # creating the paper folder
             paper_dir = '/home/gauravs/Automates/results_file/latex_equations/{}'.format(tex_folder)
