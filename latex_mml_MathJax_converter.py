@@ -41,13 +41,13 @@ if __name__ == "__main__":
     for folder in os.listdir(folder_correct_latex_eqns):
         mml_folder = os.path.join(mml_dir, folder)
         if not os.path.exists(mml_folder):
-            subprocess.call(['mkdir', mml_folder])xdeswq21
+            subprocess.call(['mkdir', mml_folder])
         for eqn in os.listdir(os.path.join(folder_correct_latex_eqns, folder)):
             file_name = eqn.split(".")[0]
-            file_path = os.path.join(root, "latex_equations/{}/{}".format(folder, file_name))
+            file_path = os.path.join(root, "latex_equations/{}/{}.txt".format(folder, file_name))
             text_eqn = open("file_path", "r")
             Latex_strs_json.append(text_eqn.readlines())
             # read the text version of this eqn in latex_eqns file 
-            #text_eqn = open("file_path", "r")
+            #text_eqn = open(file_path, "r")
         json.dump(Latex_strs_json, os.path.join(root, "json_temp.txt"))
         main(os.path.join(root, "json_temp.txt"), os.path.join(mml_folder, f"{file_name}.txt"))
