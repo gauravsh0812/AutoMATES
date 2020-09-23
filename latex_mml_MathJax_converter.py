@@ -57,8 +57,8 @@ if __name__ == "__main__":
         # read the text version of this eqn in latex_eqns file
         #text_eqn = open("file_path", "r")
         print("Latex strs json arry --> {}".format(Latex_strs_json))
-        json.dump(Latex_strs_json, open(os.path.join(root, "jsonFile.txt"),"w"))
+        json.dump(Latex_strs_json, open(os.path.join(root, f"JSON_dir/{folder}"),"w"))
 
         # calling main(arg1, arg2) --> arg1: path to json file containing latex eqns
         # args2: path to the json file to store converted mml eqns.
-        main(os.path.join(root,"jsonFile.txt"), os.path.join(mml_folder, "MathJax_mml_codes.txt"))
+        main(os.path.join(root, f"JSON_dir/{folder}"), os.path.join(mml_folder, "MathJax_mml_codes.txt"))
