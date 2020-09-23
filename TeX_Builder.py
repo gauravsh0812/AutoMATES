@@ -68,7 +68,7 @@ def main(latex_equations, tex_files):
             keyword_Macro_dict[i[ibegin+1 : iend]] = i
         
         for MF in os.listdir(path_to_folder):
-            if MF != "DeclareMathOperator_paper.txt" or MF!= "Macros_paper.txt":
+            if MF != "DeclareMathOperator_paper.txt" and MF!= "Macros_paper.txt":
                 main_file = os.path.join(path_to_folder, MF)
                 with open (main_file, 'r') as file:
                     eqn = file.readlines()
