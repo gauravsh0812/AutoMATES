@@ -1,65 +1,53 @@
 import requests
+import subprocess, os
 import json
 import argparse
 
 
-def main(args):
+def main(eqn, mml_path):
     # Define the webservice address
     webservice = "http://localhost:8081"
 
     # Load the LaTeX string data
-    latex_strs = json.load(open(args.infile, "r"))
+    #latex_strs = json.load(open(eqn, "r"))
 
     # Translate and save each LaTeX string using the NodeJS service for MathJax
-    if args.bulk:
+    mml_strs = list()
+    for latex in eqn:#latex_strs:
+        print(latex)
         res = requests.post(
-            f"{webservice}/bulk_tex2mml",
+            f"{webservice}/tex2mml",
             headers={"Content-type": "application/json"},
-            json={"TeX_data": json.dumps(latex_strs)},
+            json={"tex_src": json.dumps(latex)},
         )
         # Save the MML text response to our list
-        mml_strs = res.json()
-    else:
-        mml_strs = list()
-        for latex in latex_strs:
-            print(latex)
-            res = requests.post(
-                f"{webservice}/tex2mml",
-                headers={"Content-type": "application/json"},
-                json={"tex_src": json.dumps(latex)},
-            )
-            # Save the MML text response to our list
-            mml_strs.append(res.text)
+        mml_strs.append(res.text)
 
     # Dump the MathML strings to JSON
-    json.dump(mml_strs, open(args.outfile, "w"))
+    json.dump(mml_strs, open(mml_path, "w"))
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Enable convserion of LaTeX to MathML"
-    )
-    parser.add_argument(
-        "-i",
-        "--infile",
-        type=str,
-        required=True,
-        help="Filepath to a JSON file containing LaTeX equation strings",
-    )
-    parser.add_argument(
-        "-o",
-        "--outfile",
-        type=str,
-        required=True,
-        help="Filepath to a JSON file to use for storing translated MathML",
-    )
-    parser.add_argument(
-        "-b",
-        "--bulk",
-        action="store_true",
-        default=False,
-        help="If True, send all LaTeX equations in a single request",
-    )
-
-    args = parser.parse_args()
-    main(args)
+    
+    root = "/home/gauravs/Automates/results_file"
+    
+    # to collectg all teh correct latex eqns as str 
+    Latex_strs_json = []
+    # path to directory containing correct latex eqns 
+    folder_correct_latex_eqns = os.path.join(root, "latex_correct_equations")
+    # path to directory contain mml eqns
+    mml_dir = os.path.join(root, "Mathjax_mml")
+    
+    for folder in os.listdir(folder_correct_latex_eqns):
+        mml_folder = os.path.join(mml_dir, folder)
+        if not os.path.exists(mml_folder):
+            subprocess.call(['mkdir', mml_folder])xdeswq21
+        for eqn in os.listdir(os.path.join(folder_correct_latex_eqns, folder)):
+            file_name = eqn.split(".")[0]
+            file_path = os.path.join(root, "latex_equations/{}/{}".format(folder, file_name))
+            text_eqn = open("file_path", "r")
+            Latex_strs_json.append(text_eqn.readlines())
+            # read the text version of this eqn in latex_eqns file 
+            #text_eqn = open("file_path", "r")
+        json.dump(Latex_strs_json, os.path.join(root, "json_temp.txt"))
+        main(os.path.join(root, "json_temp.txt"), os.path.join(mml_folder, f"{file_name}.txt"))
