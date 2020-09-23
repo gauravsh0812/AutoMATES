@@ -13,7 +13,6 @@ import subprocess
 ##########################################################################################################################################
 # Parsing latex equations
 ##########################################################################################################################################
-
 # to find inline equations i.e. $(...)$
 def inline(length, line):
     pos = [pos for pos, char in enumerate(line) if char == "$"]
@@ -52,7 +51,7 @@ def parenthesis_equation(line):
         return(parenthesis)
 
 # dealing with Macros
-def Macros(line):    
+def Macro(line):    
     # checking the brackets
     open_curly_brac = [char for char in line if char == "{"]
     close_curly_brac = [char for char in line if char == "}"]
@@ -189,7 +188,7 @@ def List_to_Str(eqn, encoding):
             s += ele
         return s
 
-def Cleaning_writing_eqns(total_equations, encoding):
+def Cleaning_writing_eqn(src_latex, total_equations, encoding, tex_folder):
     eq=[]
     for e in total_equations:
         if type(e) is list:
@@ -208,7 +207,7 @@ def Cleaning_writing_eqns(total_equations, encoding):
             with open('/home/gauravs/Automates/results_file/latex_equations/{}/eqn{}_latex_equations.txt'.format(tex_folder, i), 'w') as file:
                 file.write(cleaned_eq)
                 file.close()
-    return(len(src_latex))
+    return(src_latex)
     
 def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters):
     # looping through the latex paper directories
@@ -230,9 +229,8 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
             lines = file.readlines()
 
             # initializing the arrays and variables
-            src_latex=[]
-            #macro_dict = {}
             total_macros = []
+            src_latex=[]
             declare_math_operator = []
             total_equations = []
             alpha = 0
@@ -257,11 +255,10 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
                 # extracting MACROS
                 if "\\newcommand" in line or "\\renewcommand" in line:
                     L = Macro(line)
-                    #var = line[line.find("{")+1 : line.find("}")]
-                    #macro_dict[var] = line[line.find("}")+1 : ]
-                    MacroFile.write(L)             
+                    if L is not None:
+                        MacroFile.write(L)             
 
-                # extract declare math operator
+                # extract declare math op:erator
                 if "\\DeclareMathOperator" in line:
                     DMOFile.write(line)
 
@@ -402,10 +399,10 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
             MacroFile.close()
             DMOFile.close()
             #print(total_equations)
-            src_latex_length = Cleaning_writing_eqn(total_equations, encoding, tex_folder)
+            src_latex = Cleaning_writing_eqn(src_latex, total_equations, encoding, tex_folder)
 
             # Total number eqn parsed 
-            Total_Parsed_Eqn += src_latex_length
+            Total_Parsed_Eqn += len(src_latex)
         
         # if tex has unknown encoding or which can not be converted to some known encoding
         else:
