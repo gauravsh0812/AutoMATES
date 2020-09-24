@@ -35,10 +35,10 @@ for folder in os.listdir(TexFolderPath):
             os.chdir(eqn_tex_dst_root)
             output = func_timeout(5, run_pdflatex, args=(tex_folder, texfile))#subprocess.run(command)
             OutFlag = True
-        #print(output.returncode)
-        #if not output == 0:
-         #   os.unlink(f'{i}.pdf')
+            
+            # Removing log file
             os.remove(os.path.join(eqn_tex_dst_root, f'{i}.log'))
+            
         except FunctionTimedOut:
             print("%s couldn't run within 5 sec"%texfile)
 
@@ -46,16 +46,30 @@ for folder in os.listdir(TexFolderPath):
         if OutFlag:
             if output.returncode==0:
                 copyfile(os.path.join(tex_folder,texfile), os.path.join(os.path.join(latex_correct_equations_folder, f"{texfile}")))
+            else:
+                # Getting line number of the incorrect equation from Eqn_LineNum_dict dictionary got from ParsingLatex
+                # Due to dumping the dictionary in ParsingLatex.py code, we will treating the dictionary as text file.
+                Paper_Eqn_number = "{}_{}".format(folder, texfile.split(".")[0])  # Folder#_Eqn# --> e.g. 1401.0700_eqn98
+                Eqn_Num = "{}".format(texfile.split(".")[0])   # e.g. eqn98
+                Index = [i for i,c in enumerate(Eqn_LineNum[0].split(",")) if Eqn_Num in c] # Getting Index of item whose keys() has eqn#
+                Line_Num = Eqn_LineNum[0].split(",")[Index[0]].split(":")[1].strip() # Value() of above Keys()
+                IncorrectPDF[Paper_Eqn_number] = Line_Num
+        else:
+            # If file couldn't execute within 5 seconds
+            Paper_Eqn_number = "{}_{}".format(folder, texfile.split(".")[0])
+            Eqn_Num = "{}".format(texfile.split(".")[0])
+            Index = [i for i,c in enumerate(Eqn_LineNum[0].split(",")) if Eqn_Num in c]
+            Line_Num = Eqn_LineNum[0].split(",")[Index[0]].split(":")[1].strip()
+            IncorrectPDF[Paper_Eqn_number] = Line_Num
 
         try:
+            # Removing aux file if exist
             os.remove(os.path.join(eqn_tex_dst_root, f'{i}.aux'))
         except:
             pass
-        #os.remove(os.path.join(eqn_tex_dst_root, f'{i}.log'))
 
-        # copying the tex file to the correct latex eqn directory
-        #copy_path = "/home/gauravs/Automates/results_file/latex_correct_equations/{}/{}.tex".format(folder, tex_file)
-        #subprocess.call(['cp', os.path.join(tex_folder,texfile), copy_path])
+# Dumping IncorrectPDF logs
+json.dump(IncorrectPDF, open("/home/gauravs/Automates/results_file/IncorrectPDFs.txt","w"), indent = 4)
 
 '''
 # creating image files
