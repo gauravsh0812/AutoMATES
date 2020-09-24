@@ -188,26 +188,27 @@ def List_to_Str(eqn, encoding):
             s += ele
         return s
 
-def Cleaning_writing_eqn(src_latex, total_equations, encoding, tex_folder):
-    eq=[]
-    for e in total_equations:
+def Cleaning_writing_eqn(src_latex, Line_eqn_dict, Final_EqnNum_LineNum_dict, encoding, tex_folder):
+    eq_dict={}
+    for e,line_num in Line_eqn_dict.items():#total_equations:
         if type(e) is list:
-            eq.append(List_to_Str(e, encoding))
+            eq_dict[List_to_Str(e, encoding)] = line_num
         else:
-            eq.append(e)
-    #print(eq)      
-    for i in range(len(eq)):    
+            eq_dict[e] = line_num
+    #print(eq)
+    for i, eq in enumerate(eq_dict):
         # removing unnecc stuff - label, text, intertext
-        par_clean_eq = Clean_eqn_1(eq[i])
+        par_clean_eq = Clean_eqn_1(eq)
         cleaned_eq = Clean_eqn_2(par_clean_eq)
 
         # sending the output to the dictionaries
         if cleaned_eq not in src_latex:
-            src_latex.append(cleaned_eq) 
+            src_latex.append(cleaned_eq)
+            Final_EqnNum_LineNum_dict[f"eqn{i}"] = eq_dict[eq]
             with open('/home/gauravs/Automates/results_file/latex_equations/{}/eqn{}.txt'.format(tex_folder, i), 'w') as file:
                 file.write(cleaned_eq)
                 file.close()
-    return(src_latex)
+    return(src_latex, Final_EqnNum_LineNum_dict)
     
 def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters):
     Total_Parsed_Eqn = 0
@@ -233,6 +234,7 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
             total_macros = []
             src_latex=[]
             declare_math_operator = []
+            Line_eqn_dict = {}
             total_equations = []
             alpha = 0
             matrix = 0
@@ -265,6 +267,9 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
                 # condition 1.a: if $(....)$ is present
                 # condition 1.b: if $$(....)$$ is present --> replace it with $(---)$
                 if "$" in line or "$$" in line and alpha == 0:
+                    # if line has any eqn
+                    EqnFlag = True
+                   
                     if "$$" in line:
                         line = line.replace("$$", "$")
 
@@ -306,10 +311,12 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
                         r=[sym for sym in relational_operators if (sym in inline_equation)]
                         if bool(r):# == True:
                             total_equations.append(inline_equation)
+                            Line_eqn_dict[inline_equation] = index
 
 
                 # condition 2: if \[....\] is present
                 if "\\[" in line and alpha == 0:
+                    EqnFlag = True
                     length_begin = len([c for c in line if c=="\\["])
                     length_end = len([c for c in line if c=="\\]"])
 
@@ -332,7 +339,8 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
                     if Bequations is not None:
                         r=[sym for sym in relational_operators if (sym in Bequations)]
                         if bool(r):# == True:
-                            total_equations.append(Bequations) 
+                            total_equations.append(Bequations)
+                            Line_eqn_dict[Bequations] = index
 
 
                 # condition 3: if \(....\) is present
@@ -358,7 +366,8 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
                     if Pequations is not None:
                         r=[sym for sym in relational_operators if (sym in Pequations)]
                         if bool(r):# == True:
-                            total_equations.append(Pequations) 
+                            total_equations.append(Pequations)
+                            Line_eqn_dict[Pequations] = index
 
                 # condition 4: if \begin{equation(*)} \begin{case or split} --- \end{equation(*)} \begin{case or split}
                 # comdition 5: if \begin{equation(*)} --- \end{equation(*)}
@@ -379,6 +388,7 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
                         for i in range(len(equation)):
                             eqn = eqn + equation[i].decode(encoding, errors = "ignore")
                         total_equations.append(eqn)
+                        Line_eqn_dict[eqn] = index
 
                 # condition 6: if '\\begin{..matrix(*)}' but independent under condition 4
                 for mc in matrix_cmds:
@@ -395,14 +405,18 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
                         # append the array with the recet equation along with the \\begin{} and \\end{} statements
                         equation = lines[begin_matrix_index : end_matrix_index+1]
                         total_equations.append(equation)
+                        Line_eqn_dict[List_to_Str(equation, encoding)] = index
 
             MacroFile.close()
             DMOFile.close()
             #print(total_equations)
-            src_latex = Cleaning_writing_eqn(src_latex, total_equations, encoding, tex_folder)
+            src_latex, Final_EqnNum_LineNum_dict = Cleaning_writing_eqn(src_latex, Line_eqn_dict, Final_EqnNum_LineNum_dict, encoding, tex_folder)
 
             # Total number eqn parsed 
             Total_Parsed_Eqn += len(src_latex)
+            
+             # Dumping Final_EqnNum_LineNum_dict
+            json.dump(Final_EqnNum_LineNum_dict, open(f"/home/gauravs/Automates/results_file/latex_equations/{tex_folder}/Eqn_LineNum_dict.txt", "w"))
         
         # if tex has unknown encoding or which can not be converted to some known encoding
         else:
@@ -428,5 +442,5 @@ if __name__ == "__main__":
     Total_Parsed_Eqn, unknown_encoding_tex = main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters)
     print("Total number equations succesfully parsed --> %d" %Total_Parsed_Eqn) 
     print("Files with unknown encoding are: ")
-    for i in unknown_encoding_tex:
-        print(i)
+    print(unknown_encoding_tex)
+        
