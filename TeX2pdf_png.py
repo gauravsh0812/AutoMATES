@@ -47,21 +47,27 @@ for folder in os.listdir(TexFolderPath):
             if output.returncode==0:
                 copyfile(os.path.join(tex_folder,texfile), os.path.join(os.path.join(latex_correct_equations_folder, f"{texfile}")))
             else:
-                # Getting line number of the incorrect equation from Eqn_LineNum_dict dictionary got from ParsingLatex
-                # Due to dumping the dictionary in ParsingLatex.py code, we will treating the dictionary as text file.
-                Paper_Eqn_number = "{}_{}".format(folder, texfile.split(".")[0])  # Folder#_Eqn# --> e.g. 1401.0700_eqn98
-                Eqn_Num = "{}".format(texfile.split(".")[0])   # e.g. eqn98
-                Index = [i for i,c in enumerate(Eqn_LineNum[0].split(",")) if Eqn_Num in c] # Getting Index of item whose keys() has eqn#
-                Line_Num = Eqn_LineNum[0].split(",")[Index[0]].split(":")[1].strip() # Value() of above Keys()
-                IncorrectPDF[Paper_Eqn_number] = Line_Num
+                try:
+                    # Getting line number of the incorrect equation from Eqn_LineNum_dict dictionary got from ParsingLatex
+                    # Due to dumping the dictionary in ParsingLatex.py code, we will treating the dictionary as text file.
+                    Paper_Eqn_number = "{}_{}".format(folder, texfile.split(".")[0])  # Folder#_Eqn# --> e.g. 1401.0700_eqn98
+                    Eqn_Num = "{}".format(texfile.split(".")[0])   # e.g. eqn98
+                    Index = [i for i,c in enumerate(Eqn_LineNum[0].split(",")) if Eqn_Num in c] # Getting Index of item whose keys() has eqn#
+                    Line_Num = Eqn_LineNum[0].split(",")[Index[0]].split(":")[1].strip() # Value() of above Keys()
+                    IncorrectPDF[Paper_Eqn_number] = Line_Num
+                except:
+                    pass
         else:
-            # If file couldn't execute within 5 seconds
-            Paper_Eqn_number = "{}_{}".format(folder, texfile.split(".")[0])
-            Eqn_Num = "{}".format(texfile.split(".")[0])
-            Index = [i for i,c in enumerate(Eqn_LineNum[0].split(",")) if Eqn_Num in c]
-            Line_Num = Eqn_LineNum[0].split(",")[Index[0]].split(":")[1].strip()
-            IncorrectPDF[Paper_Eqn_number] = Line_Num
-
+            try:
+                # If file couldn't execute within 5 seconds
+                Paper_Eqn_number = "{}_{}".format(folder, texfile.split(".")[0])
+                Eqn_Num = "{}".format(texfile.split(".")[0])
+                Index = [i for i,c in enumerate(Eqn_LineNum[0].split(",")) if Eqn_Num in c]
+                Line_Num = Eqn_LineNum[0].split(",")[Index[0]].split(":")[1].strip()
+                IncorrectPDF[Paper_Eqn_number] = Line_Num
+            except:
+                pass
+        
         try:
             # Removing aux file if exist
             os.remove(os.path.join(eqn_tex_dst_root, f'{i}.aux'))
