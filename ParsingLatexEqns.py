@@ -116,14 +116,18 @@ def Clean_eqn_1(eqn_1):
 
 #removing non-essential commands
 def Clean_eqn_2(eqn_2):
+    
+    # removing "commas", "fullstop" and extra space at the end of the eqn
+    eqn_2 = eqn_2.strip()
+    if eqn_2[-1] == "," or eqn_2[-1] == ".":
+        eqn_2 = eqn_2[:-1]
+    
+    # replacing other unnecessary characters
     to_replace = ["\n", "%", "\r", "\\bm", "&&"]
     for char in to_replace:
         if char in eqn_2:
             try:
                 eqn_2 = eqn_2.replace(char, '')
-            #except:
-                # see if eqn_2 is a tuple
-             #   eqn_2 = ' '.join(str(x) for x in eqn_2 if x != char)
             except:
                 pass
                 #print("some problem with equation")
