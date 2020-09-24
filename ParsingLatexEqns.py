@@ -116,11 +116,13 @@ def Clean_eqn_1(eqn_1):
 
 #removing non-essential commands
 def Clean_eqn_2(eqn_2):
-    
-    # removing "commas", "fullstop" and extra space at the end of the eqn
-    eqn_2 = eqn_2.strip()
-    if eqn_2[-1] == "," or eqn_2[-1] == ".":
-        eqn_2 = eqn_2[:-1]
+    try:
+        # removing "commas", "fullstop" and extra space at the end of the eqn
+        eqn_2 = eqn_2.strip()
+        if eqn_2[-1] == "," or eqn_2[-1] == ".":
+            eqn_2 = eqn_2[:-1]
+    except:
+        pass
     
     # replacing other unnecessary characters
     to_replace = ["\n", "%", "\r", "\\bm", "&&"]
@@ -201,17 +203,18 @@ def Cleaning_writing_eqn(src_latex, Line_eqn_dict, Final_EqnNum_LineNum_dict, en
             eq_dict[e] = line_num
     #print(eq)
     for i, eq in enumerate(eq_dict):
-        # removing unnecc stuff - label, text, intertext
-        par_clean_eq = Clean_eqn_1(eq)
-        cleaned_eq = Clean_eqn_2(par_clean_eq)
+        if len(eq)!=0:
+            # removing unnecc stuff - label, text, intertext
+            par_clean_eq = Clean_eqn_1(eq)
+            cleaned_eq = Clean_eqn_2(par_clean_eq)
 
-        # sending the output to the dictionaries
-        if cleaned_eq not in src_latex:
-            src_latex.append(cleaned_eq)
-            Final_EqnNum_LineNum_dict[f"eqn{i}"] = eq_dict[eq]
-            with open('/home/gauravs/Automates/results_file/latex_equations/{}/eqn{}.txt'.format(tex_folder, i), 'w') as file:
-                file.write(cleaned_eq)
-                file.close()
+            # sending the output to the dictionaries
+            if cleaned_eq not in src_latex:
+                src_latex.append(cleaned_eq)
+                Final_EqnNum_LineNum_dict[f"eqn{i}"] = eq_dict[eq]
+                with open('/home/gauravs/Automates/results_file/latex_equations/{}/eqn{}.txt'.format(tex_folder, i), 'w') as file:
+                    file.write(cleaned_eq)
+                    file.close()
     return(src_latex, Final_EqnNum_LineNum_dict)
     
 def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters):
