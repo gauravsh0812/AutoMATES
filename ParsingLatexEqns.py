@@ -219,6 +219,7 @@ def Cleaning_writing_eqn(src_latex, Line_eqn_dict, Final_EqnNum_LineNum_dict, en
     
 def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters):
     Total_Parsed_Eqn = 0
+    unknown_encoding_tex = []
     # looping through the latex paper directories
     dir_path = '/home/gauravs/Automates/LaTeX_src/single_tex_1401'
     for tex_folder in os.listdir(dir_path):
@@ -232,7 +233,6 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
         encoding = subprocess.check_output(["file", "-i",Tex_doc ]).decode("utf-8").split()[2].split("=")[1]
         #print(encoding)
 
-        unknown_encoding_tex = []
         if encoding not in unknown_iconv:
             file = open(Tex_doc, 'rb')
             lines = file.readlines()
@@ -450,4 +450,5 @@ if __name__ == "__main__":
     print("Total number equations succesfully parsed --> %d" %Total_Parsed_Eqn) 
     print("Files with unknown encoding are: ")
     print(unknown_encoding_tex)
-        
+    # Dumping unknown_encoding_tex
+    json.dump(unknown_encoding_tex, open("/home/gauravs/Automates/results_file/unknown_encoding_tex.txt","w" ))
