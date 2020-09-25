@@ -48,7 +48,7 @@ def main(latex_equations, tex_files):
         # Dealing with "/DeclareMathOperator"
         DMO_file = os.path.join(path_to_folder, "DeclareMathOperator_paper.txt")
         with open(DMO_file, 'r') as file:
-            DMO = file.readline()
+            DMO = file.readlines()
         
         # initializing /DeclareMathOperator dictionary
         keyword_dict={}
@@ -59,7 +59,7 @@ def main(latex_equations, tex_files):
         # Dealing with "Macros"
         Macro_file = os.path.join(path_to_folder, "Macros_paper.txt")
         with open(Macro_file, 'r') as file:
-            Macro = file.readline()
+            Macro = file.readlines()
         
         # initializing /Macros dictionary
         keyword_Macro_dict={}
@@ -76,7 +76,8 @@ def main(latex_equations, tex_files):
                 
                 TeX_name = MF.split(".")[0]
                 # calling function to create tex doc for the particular folder --> giving all latex eqns, DMOs, Macros and tex_folder path as arguments
-                CreateTexDoc(eqn, keyword_dict, keyword_Macro_dict, tex_folder, TeX_name)
+                if len(eqn)!=0:
+                    CreateTexDoc(eqn[0], keyword_dict, keyword_Macro_dict, tex_folder, TeX_name)
 
 if __name__ == "__main__":
     # paths
