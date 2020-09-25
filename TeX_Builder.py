@@ -3,7 +3,7 @@
 import os, subprocess
 
 # Template for the TeX files
-def template(eqn, Preamble):
+def template(eqn, Preamble_DMO, Preamble_Macro):
     
     # writing tex document for respective eqn 
     temp1 = '\\documentclass{standalone}\n' \
@@ -13,7 +13,7 @@ def template(eqn, Preamble):
             f'$\\displaystyle {{{{ {eqn} }}}} $\n' \
             '\\end{document}'
     
-    temp = temp1 + Preamble + temp2
+    temp = temp1 + Preamble_DMO + Preamble_Macro + temp2
     return(temp)
 
 # function to create tex documents for each eqn in the folder
@@ -22,15 +22,16 @@ def CreateTexDoc(eqn, keyword_dict, keyword_Macro_dict, tex_folder, TeX_name):
     # checking \DeclareMathOperator and Macros
     DeclareMathOperator_in_eqn = [kw for kw in keyword_dict.keys() if kw in eqn]
     Macros_in_eqn = [kw for kw in keyword_Macro_dict.keys() if kw in eqn]
-    Preamble = ''
-    for arr in [DeclareMathOperator_in_eqn, Macros_in_eqn]:
-        for d in arr:
-            Preamble += "{} \n".format(d)
+    Preamble_DMO, Preamble_Macro = '', ''
+    for d in DeclareMathOperator_in_eqn:
+        Preamble_DMO += "{} \n".format(keyword_dict[d])
+    for m in Macros_in_eqn:
+        Preamble_Macro += "{} \n".format(keyword_Macro_dict[m])
             
     # creating tex file
     path_to_tex = os.path.join(tex_folder, "{}.tex".format(TeX_name))
     with open(path_to_tex, 'w') as f_input:
-        f_input.write(template(eqn, Preamble))
+        f_input.write(template(eqn, Preamble_DMO, Preamble_Macro))
         f_input.close()
 
 def main(latex_equations, tex_files):
