@@ -1,4 +1,4 @@
-# automates_scripts data engineeirng scripts
+# automates_scripts data engineering scripts
 
 ParsingLatexEqns.py --> Python code to parse the equations from the latex source codes of research papers.
 
