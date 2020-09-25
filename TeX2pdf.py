@@ -1,6 +1,6 @@
 # pdf and png
 import os, subprocess
-from pdf2image import convert_from_path
+import json
 from shutil import copyfile
 from func_timeout import func_timeout, FunctionTimedOut
 
