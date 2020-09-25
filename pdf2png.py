@@ -30,7 +30,3 @@ if __name == "__main__":
             if pdf_file.split(".")[1] == "pdf":
                 pdf_file_path = os.path.join(pdf_folder, pdf_file) 
                 main(pdf_file_path, pdf_file, image_folder)
-            
-            
-    
-    
