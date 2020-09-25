@@ -50,7 +50,7 @@ if __name__ == "__main__":
         # Macros and Declare Math Operator commands.
         
         # Creating Macros dictionary
-        Macro_path = os.path.join(root, f"latex_equations/{folder}/Macros_paper.txt")
+        Macro_file = os.path.join(root, f"latex_equations/{folder}/Macros_paper.txt")
         with open(Macro_file, 'r') as file:
             Macro = file.readline()
             file.close()
@@ -60,7 +60,7 @@ if __name__ == "__main__":
             keyword_Macro_dict[i[ibegin+1 : iend]] = i
         
         # Creating DMO dictionary
-        DMO_path = os.path.join(root, f"latex_equations/{folder}/DeclareMathOperator_paper.txt")
+        DMO_file = os.path.join(root, f"latex_equations/{folder}/DeclareMathOperator_paper.txt")
         with open(DMO_file, 'r') as file:
             DMO = file.readline()
             file.close()
@@ -86,8 +86,10 @@ if __name__ == "__main__":
             Latex_strs_json.append(final_string)
         
         # Dumping Latex_strs_json
-        json.dump(Latex_strs_json, open(os.path.join(root, f"JSON_dir/{folder}"),"w"))
+        if not os.path.exists(os.path.join(root, f"JSON_dir/{folder}_MathJax")):
+            subprocess.call(["mkdir", os.path.join(root, f"JSON_dir_MathJax/{folder}")])
+        json.dump(Latex_strs_json, open(os.path.join(root, f"JSON_dir_MathJax/{folder}/strings.txt"),"w"))
 
         # calling main(arg1, arg2) --> arg1: path to json file containing latex eqns
         # args2: path to the json file to store converted mml eqns.
-        main(os.path.join(root, f"JSON_dir/{folder}"), os.path.join(mml_folder, "MathJax_mml_codes.txt"))
+        main(os.path.join(root, f"JSON_dir_MathJax/{folder}/strings.txt"), os.path.join(mml_folder, "MathJax_mml_codes.txt"))
