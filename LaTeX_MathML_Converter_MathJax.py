@@ -52,7 +52,7 @@ if __name__ == "__main__":
         # Creating Macros dictionary
         Macro_file = os.path.join(root, f"latex_equations/{folder}/Macros_paper.txt")
         with open(Macro_file, 'r') as file:
-            Macro = file.readline()
+            Macro = file.readlines()
             file.close()
         keyword_Macro_dict={}
         for i in Macro:
@@ -62,7 +62,7 @@ if __name__ == "__main__":
         # Creating DMO dictionary
         DMO_file = os.path.join(root, f"latex_equations/{folder}/DeclareMathOperator_paper.txt")
         with open(DMO_file, 'r') as file:
-            DMO = file.readline()
+            DMO = file.readlines()
             file.close()
         keyword_dict={}
         for i in DMO:
