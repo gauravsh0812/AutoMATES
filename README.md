@@ -1,14 +1,16 @@
 # automates_scripts
 
-ParsingLatexEqns_CreatingTexFiles.py --> Python code to parse the equations from the latex source codes of research papers and creating tex files of them.
+ParsingLatexEqns.py --> Python code to parse the equations from the latex source codes of research papers.
 
-tex2pdf_png.py --> Python code to get pdf files of equations using tex files, created in the ParsingLatexEqns_CreatingTexFiles.py, using "pdflatex". Also, create images(.png) of the equations.
+TeX_Builder.py --> Python code to build TeX files of the equations parsed using "ParsingLatexEqns.py". 
 
-latex2image.py --> Its is also a python code performing similar function as of tex2pdf_png.py. The only difference is that the code has additional function of creating tex files.
+TeX2pdf.py --> Python code to get pdf files of equations from their TeX files, using "pdflatex".
 
-latex_mml_MathJax_converter.py --> Python code to covert latex equations to MathML code using "MathJax". 
+pdf2png.py --> Python code to render .png image of the pdfs.
 
-latex_mml_latex2mml_converter.py --> Python code to covert latex equations to MathML code using "latex2mml" library.
+LaTeX_MathML_Converter_MathJax.py --> Python code to covert latex equations to MathML code using "MathJax". 
+
+LaTeX_MathML_Converter_latex2mml.py --> Python code to covert latex equations to MathML code using "latex2mml" library.
 
 json2js.py --> Python code to convert json file to javascript format. 
 
