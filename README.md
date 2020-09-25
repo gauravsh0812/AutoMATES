@@ -1,8 +1,6 @@
-# Automates data engineering scripts
-
-Automates: https://ml4ai.github.io/automates/
+Automates link: https://ml4ai.github.io/automates/
 ============================================================================================================================
-CODES
+Automates data engineering scripts
 ============================================================================================================================
 ParsingLatexEqns.py --> Python code to parse the equations from the latex source codes of research papers.
 
