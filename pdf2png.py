@@ -11,7 +11,7 @@ def main(pdf_file_path, pdf_file, image_folder):
     except:
         pass
 
-if __name == "__main__":
+if __name__ == "__main__":
     # Paths
     root = "/home/gauravs/Automates/results_file"
     pdf_path = os.path.join(root, "latex_pdf")
@@ -22,11 +22,11 @@ if __name == "__main__":
         pdf_folder = os.path.join(pdf_path, fldr)
         # mkdir image folder if not exists
         image_folder = os.path.join(image_path, fldr)
-        if not exists(image_folder):
+        if not os.path.exists(image_folder):
             subprocess.call(["mkdir", image_folder])
         
         # Looping through pdf files
-        for pdf_file in os.listdir(fldr):
+        for pdf_file in os.listdir(os.path.join(pdf_path, fldr)):
             if pdf_file.split(".")[1] == "pdf":
                 pdf_file_path = os.path.join(pdf_folder, pdf_file) 
                 main(pdf_file_path, pdf_file, image_folder)
