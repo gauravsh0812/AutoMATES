@@ -125,14 +125,13 @@ def Clean_eqn_2(eqn_2):
         pass
     
     # replacing other unnecessary characters
-    to_replace = ["\n", "%", "\r", "\\bm", "&&"]
-    for char in to_replace:
-        if char in eqn_2:
-            try:
-                eqn_2 = eqn_2.replace(char, '')
-            except:
-                pass
-                #print("some problem with equation")
+    #to_replace = ["\n", "%", "\r", "\\bm", "&&"]
+    #for char in to_replace:
+    #   if char in eqn_2:
+    #       try:
+    #            eqn_2 = eqn_2.replace(char, '')
+    #        except:
+    #            pass
 
     # we don't want "&" in the equation as such untill unless it is a matrix
     if "&" in eqn_2:
