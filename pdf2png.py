@@ -13,7 +13,7 @@ def main(pdf_file_path, pdf_file, image_folder):
 
 if __name__ == "__main__":
     # Paths
-    root = "/home/gauravs/Automates/results_file"
+    root = "/projects/temporary/automates/er/gaurav/results_file"
     pdf_path = os.path.join(root, "latex_pdf")
     image_path = os.path.join(root, "latex_images")
     
