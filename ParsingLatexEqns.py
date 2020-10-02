@@ -248,13 +248,14 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
             brac = 1
 
             # creating the paper folder
-            paper_dir = '/home/gauravs/Automates/results_file/latex_equations/{}'.format(tex_folder)
+            root = "/projects/temporary/automates/er/gaurav/results_file"
+            paper_dir = os.join.path(root,'latex_equations/{}'.format(tex_folder))
             if not os.path.exists(paper_dir):
                 call(['mkdir', paper_dir])
 
             # opening files to write Macros and declare math operator
-            MacroFile = open('/home/gauravs/Automates/results_file/latex_equations/{}/Macros_paper.txt'.format(tex_folder), 'w') 
-            DMOFile = open('/home/gauravs/Automates/results_file/latex_equations/{}/DeclareMathOperator_paper.txt'.format(tex_folder), 'w') 
+            MacroFile = open(os.join.path(root, 'latex_equations/{}/Macros_paper.txt'.format(tex_folder), 'w')) 
+            DMOFile = open(os.join.path(root, 'latex_equations/{}/DeclareMathOperator_paper.txt'.format(tex_folder), 'w'))
 
             # since lines are in bytes, we need to convert them into str    
             for index, l in enumerate(lines):
@@ -422,7 +423,7 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
             Total_Parsed_Eqn += len(src_latex)
             
              # Dumping Final_EqnNum_LineNum_dict
-            json.dump(Final_EqnNum_LineNum_dict, open(f"/home/gauravs/Automates/results_file/latex_equations/{tex_folder}/Eqn_LineNum_dict.txt", "w"))
+            json.dump(Final_EqnNum_LineNum_dict, open(os.join.path(root, f"latex_equations/{tex_folder}/Eqn_LineNum_dict.txt", "w")))
         
         # if tex has unknown encoding or which can not be converted to some known encoding
         else:
@@ -450,4 +451,4 @@ if __name__ == "__main__":
     print("Files with unknown encoding are: ")
     print(unknown_encoding_tex)
     # Dumping unknown_encoding_tex
-    json.dump(unknown_encoding_tex, open("/home/gauravs/Automates/results_file/unknown_encoding_tex.txt","w" ))
+    json.dump(unknown_encoding_tex, open(os.join.path(root, "unknown_encoding_tex.txt","w" )))
