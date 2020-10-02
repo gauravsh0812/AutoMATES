@@ -82,7 +82,7 @@ def main(latex_equations, tex_files):
 
 if __name__ == "__main__":
     # paths
-    base_dir = "/home/gauravs/Automates/results_file"
+    base_dir = "/projects/temporary/automates/er/gaurav/results_file"
     # Latex_equations directory
     latex_equations = os.path.join(base_dir, "latex_equations")
     # tex_files dumping directory
