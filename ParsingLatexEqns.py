@@ -240,7 +240,8 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
 
                 # initializing the arrays and variables
                 total_macros = []
-                src_latex=[]
+                src_latex_inline = []
+                src_latex_large = []
                 declare_math_operator = []
                 Line_eqn_dict = {}
                 total_equations = []
@@ -419,7 +420,10 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
                 MacroFile.close()
                 DMOFile.close()
                 #print(total_equations)
-                src_latex, Final_EqnNum_LineNum_dict = Cleaning_writing_eqn(src_latex, Line_eqn_dict, Final_EqnNum_LineNum_dict, encoding, tex_folder)
+                if large_flag:
+                    src_latex_large, Final_EqnNum_LineNum_dict = Cleaning_writing_eqn(src_latex_large, Line_eqn_dict, Final_EqnNum_LineNum_dict, encoding, tex_folder)
+                else:
+                    src_latex_inline, Final_EqnNum_LineNum_dict = Cleaning_writing_eqn(src_latex_inline, Line_eqn_dict, Final_EqnNum_LineNum_dict, encoding, tex_folder) 
 
                 # Total number eqn parsed 
                 Total_Parsed_Eqn += len(src_latex)
