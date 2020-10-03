@@ -193,9 +193,9 @@ def List_to_Str(eqn, encoding):
             s += ele
         return s
 
-def Cleaning_writing_eqn(src_latex, Line_eqn_dict, Final_EqnNum_LineNum_dict, encoding, tex_folder):
-    eq_dict={}
-    for e,line_num in Line_eqn_dict.items():#total_equations:
+def Cleaning_writing_eqn(dictionary, Final_EqnNum_LineNum_dict, encoding, tex_folder, LargeFlag):
+    src_latex, eq_dict= [], {}
+    for e,line_num in dictionary.items():
         if type(e) is list:
             eq_dict[List_to_Str(e, encoding)] = line_num
         else:
@@ -211,10 +211,15 @@ def Cleaning_writing_eqn(src_latex, Line_eqn_dict, Final_EqnNum_LineNum_dict, en
             if cleaned_eq not in src_latex:
                 src_latex.append(cleaned_eq)
                 Final_EqnNum_LineNum_dict[f"eqn{i}"] = eq_dict[eq]
-                with open('/home/gauravs/Automates/results_file/latex_equations/{}/eqn{}.txt'.format(tex_folder, i), 'w') as file:
-                    file.write(cleaned_eq)
-                    file.close()
-    return(src_latex, Final_EqnNum_LineNum_dict)
+                if LargeFlag:
+                    with open('/projects/temporary/automates/er/gaurav/results_file/latex_equations/{}/Large_eqns/eqn{}.txt'.format(tex_folder, i), 'w') as file:
+                        file.write(cleaned_eq)
+                        file.close()
+                else:
+                    with open('/projects/temporary/automates/er/gaurav/results_file/latex_equations/{}/Small_eqns/eqn{}.txt'.format(tex_folder, i), 'w') as file:
+                        file.write(cleaned_eq)
+                        file.close()
+    return(Final_EqnNum_LineNum_dict)
     
 def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters):
     Total_Parsed_Eqn = 0
@@ -240,10 +245,10 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
 
                 # initializing the arrays and variables
                 total_macros = []
-                src_latex_inline = []
-                src_latex_large = []
                 declare_math_operator = []
-                Line_eqn_dict = {}
+                Line_largeEqn_dict = {}      # For large equations
+                Line_inlineEqn_dict = {}     # For small inline equations
+                Final_EqnNum_LineNum_dict = {}
                 total_equations = []
                 alpha = 0
                 matrix = 0
@@ -255,7 +260,13 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
                 paper_dir = os.join.path(root,'latex_equations/{}'.format(tex_folder))
                 if not os.path.exists(paper_dir):
                     call(['mkdir', paper_dir])
-
+                  
+                # Making direstories for large and small eqns
+                if not os.path.exists(os.join.path(paper_dir, "Large_eqns")):
+                    call(['mkdir', os.join.path(paper_dir, "Large_eqns")]) 
+                if not os.path.exists(os.join.path(paper_dir, "Small_eqns")):
+                    call(['mkdir', os.join.path(paper_dir, "Small_eqns")]) 
+                
                 # opening files to write Macros and declare math operator
                 MacroFile = open(os.join.path(root, 'latex_equations/{}/Macros_paper.txt'.format(tex_folder), 'w')) 
                 DMOFile = open(os.join.path(root, 'latex_equations/{}/DeclareMathOperator_paper.txt'.format(tex_folder), 'w'))
@@ -321,7 +332,7 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
                             r=[sym for sym in relational_operators if (sym in inline_equation)]
                             if bool(r):# == True:
                                 total_equations.append(inline_equation)
-                                Line_eqn_dict[inline_equation] = index
+                                Line_inlineEqn_dict[inline_equation] = index
 
 
                     # condition 2: if \[....\] is present
@@ -350,7 +361,7 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
                             r=[sym for sym in relational_operators if (sym in Bequations)]
                             if bool(r):# == True:
                                 total_equations.append(Bequations)
-                                Line_eqn_dict[Bequations] = index
+                                Line_inlineEqn_dict[Bequations] = index
 
 
                     # condition 3: if \(....\) is present
@@ -377,7 +388,7 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
                             r=[sym for sym in relational_operators if (sym in Pequations)]
                             if bool(r):# == True:
                                 total_equations.append(Pequations)
-                                Line_eqn_dict[Pequations] = index
+                                Line_inlineEqn_dict[Pequations] = index
 
                     # condition 4: if \begin{equation(*)} \begin{case or split} --- \end{equation(*)} \begin{case or split}
                     # comdition 5: if \begin{equation(*)} --- \end{equation(*)}
@@ -398,7 +409,7 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
                             for i in range(len(equation)):
                                 eqn = eqn + equation[i].decode(encoding, errors = "ignore")
                             total_equations.append(eqn)
-                            Line_eqn_dict[eqn] = index
+                            Line_largeEqn_dict[eqn] = index
 
                     # condition 6: if '\\begin{..matrix(*)}' but independent under condition 4
                     for mc in matrix_cmds:
@@ -415,27 +426,24 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
                             # append the array with the recet equation along with the \\begin{} and \\end{} statements
                             equation = lines[begin_matrix_index : end_matrix_index+1]
                             total_equations.append(equation)
-                            Line_eqn_dict[List_to_Str(equation, encoding)] = index
+                            Line_largeEqn_dict[List_to_Str(equation, encoding)] = index
 
                 MacroFile.close()
                 DMOFile.close()
-                #print(total_equations)
-                if large_flag:
-                    src_latex_large, Final_EqnNum_LineNum_dict = Cleaning_writing_eqn(src_latex_large, Line_eqn_dict, Final_EqnNum_LineNum_dict, encoding, tex_folder)
-                else:
-                    src_latex_inline, Final_EqnNum_LineNum_dict = Cleaning_writing_eqn(src_latex_inline, Line_eqn_dict, Final_EqnNum_LineNum_dict, encoding, tex_folder) 
-
-                # Total number eqn parsed 
-                Total_Parsed_Eqn += len(src_latex)
-
-                 # Dumping Final_EqnNum_LineNum_dict
-                json.dump(Final_EqnNum_LineNum_dict, open(os.join.path(root, f"latex_equations/{tex_folder}/Eqn_LineNum_dict.txt", "w")))
+                
+                # Cleaning and Writing large and small eqns
+                Final_EqnNum_LineNum_dict_large = Cleaning_writing_eqn(Line_largeEqn_dict, Final_EqnNum_LineNum_dict, encoding, tex_folder, LargeFlag=True)
+                Final_EqnNum_LineNum_dict_small = Cleaning_writing_eqn(Line_smalldict, Final_EqnNum_LineNum_dict, encoding, tex_folder, LargeFlag=False)
+                
+                # Dumping Final_EqnNum_LineNum_dict
+                json.dump(Final_EqnNum_LineNum_dict_large, open(os.join.path(root, f"latex_equations/{tex_folder}/Eqn_LineNum_dict_large.txt", "w")))
+                json.dump(Final_EqnNum_LineNum_dict_small, open(os.join.path(root, f"latex_equations/{tex_folder}/Eqn_LineNum_dict_small.txt", "w")))
 
             # if tex has unknown encoding or which can not be converted to some known encoding
             else:
                 unknown_encoding_tex.append(tex_folder)
 
-        return(Total_Parsed_Eqn, unknown_encoding_tex)
+        return(unknown_encoding_tex)
 
 if __name__ == "__main__":
     # possible matrix and equation keyword that can be used in LaTeX source codes
@@ -452,8 +460,7 @@ if __name__ == "__main__":
     df_greek = pd.read_excel(excel_file, 'greek')
     greek_letters = df_greek.iloc[:, 0].values.tolist()
     
-    Total_Parsed_Eqn, unknown_encoding_tex = main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters)
-    print("Total number equations succesfully parsed --> %d" %Total_Parsed_Eqn) 
+    unknown_encoding_tex = main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters)
     print("Files with unknown encoding are: ")
     print(unknown_encoding_tex)
     # Dumping unknown_encoding_tex
