@@ -456,7 +456,7 @@ if __name__ == "__main__":
     # get symbols, greek letter, and encoding list 
     excel_file = '/home/gauravs/Automates/automates_scripts/Latex_symbols.xlsx'
     df = pd.read_excel(excel_file, 'rel_optr')
-    relational_operators = df.iloc[:, 1].values.tolist()
+    relational_operators = df.iloc[:, 0].values.tolist()
     df_greek = pd.read_excel(excel_file, 'greek')
     greek_letters = df_greek.iloc[:, 0].values.tolist()
     
