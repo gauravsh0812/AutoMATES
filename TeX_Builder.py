@@ -43,7 +43,7 @@ def main(latex_equations, tex_files):
         TexFolder_Large_Eqn = os.path.join(tex_folder, "Large_eqns")
         TexFolder_Small_Eqn = os.path.join(tex_folder, "Small_eqns")
         for F in [tex_folder, TexFolder_Large_Eqn, TexFolder_Small_Eqn]:
-            if not os.path.exists(F)   
+            if not os.path.exists(F):   
                 subprocess.call(['mkdir', F])
                     
         # reading eqns of paper from folder in latex_equations 
