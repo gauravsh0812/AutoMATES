@@ -226,7 +226,7 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
     unknown_encoding_tex = []
     # looping through the latex paper directories
     src_path = '/projects/temporary/automates/arxiv/src/'
-    dir_path = os.join.path(src_path, '1401')
+    dir_path = os.path.join(src_path, '1401')
     for tex_folder in os.listdir(dir_path):
         
         tex_folder_path = os.path.join(dir_path, tex_folder)
@@ -257,19 +257,19 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
 
                 # creating the paper folder
                 root = "/projects/temporary/automates/er/gaurav/results_file"
-                paper_dir = os.join.path(root,'latex_equations/{}'.format(tex_folder))
+                paper_dir = os.path.join(root,'latex_equations/{}'.format(tex_folder))
                 if not os.path.exists(paper_dir):
                     call(['mkdir', paper_dir])
                   
                 # Making direstories for large and small eqns
-                if not os.path.exists(os.join.path(paper_dir, "Large_eqns")):
-                    call(['mkdir', os.join.path(paper_dir, "Large_eqns")]) 
-                if not os.path.exists(os.join.path(paper_dir, "Small_eqns")):
-                    call(['mkdir', os.join.path(paper_dir, "Small_eqns")]) 
+                if not os.path.exists(os.path.join(paper_dir, "Large_eqns")):
+                    call(['mkdir', os.path.join(paper_dir, "Large_eqns")]) 
+                if not os.path.exists(os.path.join(paper_dir, "Small_eqns")):
+                    call(['mkdir', os.path.join(paper_dir, "Small_eqns")]) 
                 
                 # opening files to write Macros and declare math operator
-                MacroFile = open(os.join.path(root, 'latex_equations/{}/Macros_paper.txt'.format(tex_folder), 'w')) 
-                DMOFile = open(os.join.path(root, 'latex_equations/{}/DeclareMathOperator_paper.txt'.format(tex_folder), 'w'))
+                MacroFile = open(os.path.join(root, 'latex_equations/{}/Macros_paper.txt'.format(tex_folder)), 'w') 
+                DMOFile = open(os.path.join(root, 'latex_equations/{}/DeclareMathOperator_paper.txt'.format(tex_folder)), 'w')
 
                 # since lines are in bytes, we need to convert them into str    
                 for index, l in enumerate(lines):
@@ -433,17 +433,17 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
                 
                 # Cleaning and Writing large and small eqns
                 Final_EqnNum_LineNum_dict_large = Cleaning_writing_eqn(Line_largeEqn_dict, Final_EqnNum_LineNum_dict, encoding, tex_folder, LargeFlag=True)
-                Final_EqnNum_LineNum_dict_small = Cleaning_writing_eqn(Line_smalldict, Final_EqnNum_LineNum_dict, encoding, tex_folder, LargeFlag=False)
+                Final_EqnNum_LineNum_dict_small = Cleaning_writing_eqn(Line_inlineEqn_dict, Final_EqnNum_LineNum_dict, encoding, tex_folder, LargeFlag=False)
                 
                 # Dumping Final_EqnNum_LineNum_dict
-                json.dump(Final_EqnNum_LineNum_dict_large, open(os.join.path(root, f"latex_equations/{tex_folder}/Eqn_LineNum_dict_large.txt", "w")))
-                json.dump(Final_EqnNum_LineNum_dict_small, open(os.join.path(root, f"latex_equations/{tex_folder}/Eqn_LineNum_dict_small.txt", "w")))
+                json.dump(Final_EqnNum_LineNum_dict_large, open(os.path.join(root, f"latex_equations/{tex_folder}/Eqn_LineNum_dict_large.txt", "w")))
+                json.dump(Final_EqnNum_LineNum_dict_small, open(os.path.join(root, f"latex_equations/{tex_folder}/Eqn_LineNum_dict_small.txt", "w")))
 
             # if tex has unknown encoding or which can not be converted to some known encoding
             else:
                 unknown_encoding_tex.append(tex_folder)
 
-        return(unknown_encoding_tex)
+    return(unknown_encoding_tex)
 
 if __name__ == "__main__":
     # possible matrix and equation keyword that can be used in LaTeX source codes
@@ -464,4 +464,4 @@ if __name__ == "__main__":
     print("Files with unknown encoding are: ")
     print(unknown_encoding_tex)
     # Dumping unknown_encoding_tex
-    json.dump(unknown_encoding_tex, open(os.join.path(root, "unknown_encoding_tex.txt","w" )))
+    json.dump(unknown_encoding_tex, open(os.path.join(root, "unknown_encoding_tex.txt","w" )))
