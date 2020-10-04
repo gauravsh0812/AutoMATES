@@ -38,18 +38,24 @@ def main(latex_equations, tex_files):
     
     # loop through the folders
     for folder in os.listdir(latex_equations):     
-        # creating tex, pdf, image folders for each paper
+        # creating tex folders for Large and Small equations
         tex_folder = os.path.join(tex_files, folder)
-        if not os.path.exists(tex_folder):
-            subprocess.call(['mkdir', tex_folder])
+        TexFolder_Large_Eqn = os.path.join(tex_folder, "Large_eqns")
+        TexFolder_Small_Eqn = os.path.join(tex_folder, "Small_eqns)
+        for F in [tex_folder, TexFolder_Large_Eqn, TexFolder_Small_Eqn]:
+            if not os.path.exists(F)   
+                subprocess.call(['mkdir', F])
                     
         # reading eqns of paper from folder in latex_equations 
         path_to_folder = os.path.join(latex_equations, folder)
-        
+        LargeEqn_Path = os.path.join(path_to_folder, "Large_eqns")
+        SmallEqn_Path = os.path.join(path_to_folder, "Small_eqns")
+                                           
         # Dealing with "/DeclareMathOperator"
         DMO_file = os.path.join(path_to_folder, "DeclareMathOperator_paper.txt")
         with open(DMO_file, 'r') as file:
             DMO = file.readlines()
+            file.close()
         
         # initializing /DeclareMathOperator dictionary
         keyword_dict={}
@@ -61,6 +67,7 @@ def main(latex_equations, tex_files):
         Macro_file = os.path.join(path_to_folder, "Macros_paper.txt")
         with open(Macro_file, 'r') as file:
             Macro = file.readlines()
+            file.close()
         
         # initializing /Macros dictionary
         keyword_Macro_dict={}
@@ -68,17 +75,21 @@ def main(latex_equations, tex_files):
             ibegin, iend = i.find('{'), i.find('}')
             keyword_Macro_dict[i[ibegin+1 : iend]] = i
         
-        for MF in os.listdir(path_to_folder):
-            if MF != "DeclareMathOperator_paper.txt" and MF!= "Macros_paper.txt":
-                main_file = os.path.join(path_to_folder, MF)
+        # Path to the folder containing Large and Small equations
+        for Path in [LargeEqn_Path, SmallEqn_Path]:
+            for File in os.listdir(Path):    
+                main_file = os.path.join(Path, File)
                 with open (main_file, 'r') as file:
                     eqn = file.readlines()
                     file.close()
                 
-                TeX_name = MF.split(".")[0]
+                TeX_name = File.split(".")[0]
                 # calling function to create tex doc for the particular folder --> giving all latex eqns, DMOs, Macros and tex_folder path as arguments
                 if len(eqn)!=0:
-                    CreateTexDoc(eqn[0], keyword_dict, keyword_Macro_dict, tex_folder, TeX_name)
+                    if Path == "LargeEqn_Path":
+                        CreateTexDoc(eqn[0], keyword_dict, keyword_Macro_dict, TexFolder_Large_Eqn, TeX_name)
+                    else:
+                        CreateTexDoc(eqn[0], keyword_dict, keyword_Macro_dict, TexFolder_Small_Eqn, TeX_name) 
 
 if __name__ == "__main__":
     # paths
