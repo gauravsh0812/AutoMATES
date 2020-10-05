@@ -87,10 +87,7 @@ def main(path):
 
                 try:
                     # Removing aux file if exist
-                    if tf == Large_tex_files:
-                        os.remove(os.path.join(PDF_Large, f'{i}.aux'))
-                    else:
-                        os.remove(os.path.join(PDF_Small, f'{i}.aux'))
+                    os.remove(os.path.join(PDF_Large, f'{i}.aux')) if tf == Large_tex_files else os.remove(os.path.join(PDF_Small, f'{i}.aux'))
                 except:
                     pass
     return(IncorrectPDF_LargeEqn, IncorrectPDF_SmallEqn)
