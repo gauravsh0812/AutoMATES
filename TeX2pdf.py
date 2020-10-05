@@ -23,16 +23,16 @@ def main(path):
         latex_correct_equations_folder_Large = os.path.join(latex_correct_equations_folder, "Large_eqns")
         latex_correct_equations_folder_Small = os.path.join(latex_correct_equations_folder, "Small_eqns")
         for F in [latex_correct_equations_folder, latex_correct_equations_folder_Large, latex_correct_equations_folder_Small]:
-        if not os.path.exists(F):
-            subprocess.call(['mkdir',F])
+            if not os.path.exists(F):
+                subprocess.call(['mkdir',F])
 
         # make results PDF directory
         eqn_tex_dst_root = os.path.join(path, f"latex_pdf/{folder}")
         PDF_Large = os.path.join(eqn_tex_dst_root, "Large_eqns_PDFs")
         PDF_Small = os.path.join(eqn_tex_dst_root, "Small_eqns_PDFs")
         for F in [eqn_tex_dst_root, PDF_Large, PDF_Small]:
-        if not os.path.exists(F):
-            subprocess.call(['mkdir', F])
+            if not os.path.exists(F):
+                subprocess.call(['mkdir', F])
         
         # Paths to Large and Small TeX files
         Large_tex_files = os.path.join(TexFolderPath, f"{folder}/Large_eqns")
@@ -42,10 +42,18 @@ def main(path):
                 i = texfile.split(".")[0]
                 OutFlag = False
                 try:
-                    output = func_timeout(5, run_pdflatex, args=(tf, texfile))
-                    OutFlag = True
-                    # Removing log file
-                    os.remove(os.path.join(PDF_Large, f'{i}.log')) if tf == Large_tex_files else os.remove(os.path.join(PDF_Small, f'{i}.log'))
+                    if tf == Large_tex_files:
+                        os.chdir(PDF_Large)
+                        output = func_timeout(5, run_pdflatex, args=(tf, texfile))
+                        OutFlag = True
+                        # Removing log file
+                        os.remove(os.path.join(PDF_Large, f'{i}.log'))
+                    else:
+                        os.chdir(PDF_Small)
+                        output = func_timeout(5, run_pdflatex, args=(tf, texfile))
+                        OutFlag = True
+                        # Removing log file
+                        os.remove(os.path.join(PDF_Small, f'{i}.log'))
 
                 except FunctionTimedOut:
                     print("%s couldn't run within 5 sec"%texfile)
