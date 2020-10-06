@@ -140,4 +140,4 @@ if __name__ == "__main__":
                 main(os.path.join(JSON_dir_folder, "SmallStrings.txt"), os.path.join(mml_folder, "SmallEqns_MML.txt")) 
      
     pritn(keywords_log)
-    json.dump(logs, open("/projects/temporary/automates/er/gaurav/results_file/MathJax_logs.txt", "w"))  
+    json.dump(keywords_log, open("/projects/temporary/automates/er/gaurav/results_file/MathJax_logs.txt", "w"))  
