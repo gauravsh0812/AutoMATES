@@ -36,8 +36,6 @@ if __name__ == "__main__":
     root = "/projects/temporary/automates/er/gaurav/results_file"
     # Path to directory containing correct latex eqns
     folder_correct_latex_eqns = os.path.join(root, "latex_correct_equations")
-    Large_correct_eqns = os.path.join(folder_correct_latex_eqns, "Large_eqns")
-    Small_correct_eqns = os.path.join(folder_correct_latex_eqns, "Small_eqns")
     # Path to directory contain MathML eqns
     mml_dir = os.path.join(root, "Mathjax_mml")
     
@@ -74,7 +72,11 @@ if __name__ == "__main__":
         
         temp = {}
         to_replace = ["\\ensuremath", "\\xspace", "\\aligned", "\\endaligned", "\\span"]
+        Large_correct_eqns = os.path.join(folder_correct_latex_eqns, "Large_eqns")
+        Small_correct_eqns = os.path.join(folder_correct_latex_eqns, "Small_eqns")
         for ce in [Large_correct_eqns, Small_correct_eqns]:
+            if not os.path.exists(ce):
+                subprocess.call(["mkdir", ce])
             for index, eqn in enumerate(os.listdir(ce)):
                 temp[eqn] = index
                 file_name = eqn.split(".")[0]
@@ -98,7 +100,7 @@ if __name__ == "__main__":
                     final_string = ""
                     for sub in string.split(" "):
                         if "cong" in sub:
-                            sub = sub.replace("\\cong, "{\\cong}")
+                            sub = sub.replace("\\cong", "{\\cong}")
                         if "mathbb" in sub:
                             if sub[sub.find("\\mathbb")+7] != "{":
                                 mathbb_parameter = sub[sub.find("\\newcommand")+12 : sub.find("}")].replace("\\", "")
@@ -127,4 +129,4 @@ if __name__ == "__main__":
                 except:
                     pass                          
   
-     json.dump(logs, open("/projects/temporary/automates/er/gaurav/results_file/MathJax_logs.txt", "w"))  
+    json.dump(logs, open("/projects/temporary/automates/er/gaurav/results_file/MathJax_logs.txt", "w"))  
