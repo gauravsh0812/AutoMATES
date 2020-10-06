@@ -120,8 +120,8 @@ if __name__ == "__main__":
         '''Appending all the eqns of the folder/paper to Latex_strs_json 
         along with their respective Macros and Declare Math Operator commands.'''
         # Creating array of final eqns
-        Large_correct_eqns = os.path.join(folder_correct_latex_eqns, "Large_eqns")
-        Small_correct_eqns = os.path.join(folder_correct_latex_eqns, "Small_eqns")
+        Large_correct_eqns = os.path.join(folder_correct_latex_eqns, f"{folder}/Large_eqns")
+        Small_correct_eqns = os.path.join(folder_correct_latex_eqns, f"{folder}/Small_eqns")
         for ce in [Large_correct_eqns, Small_correct_eqns]:
             Latex_strs_json = Creating_final_equations(ce, folder, keyword_Macro_dict, keyword_dict, to_remove)
             
