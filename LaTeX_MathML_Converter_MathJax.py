@@ -72,9 +72,9 @@ def Creating_final_equations(ce, folder, keyword_Macro_dict, keyword_dict, to_re
             # Writing Macros, DMOs, and text_eqn as one string
             MiE, DiE = "", ""
             for macro in Macros_in_eqn:
-                MiE = MiE + macro + " "
+                MiE = MiE + keyword_Macro_dict[macro] + " "
             for dmo in DMOs_in_eqn:
-                DiE = DiE + dmo + " "    
+                DiE = DiE +  keyword_dict[dmo] + " "    
             string = MiE + DiE + text_eqn
             
             # Removing unsupported keywords 
