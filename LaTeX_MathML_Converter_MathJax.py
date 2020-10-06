@@ -41,7 +41,7 @@ if __name__ == "__main__":
     
     for folder in os.listdir(folder_correct_latex_eqns):
         # Array to keep track of the latex eqns 
-        Latex_strs_json = []       
+        #Latex_strs_json = []       
         # Creating folder for MathML codes for specific file
         mml_folder = os.path.join(mml_dir, folder)
         if not os.path.exists(mml_folder):
@@ -77,6 +77,7 @@ if __name__ == "__main__":
         for ce in [Large_correct_eqns, Small_correct_eqns]:
             if not os.path.exists(ce):
                 subprocess.call(["mkdir", ce])
+            Latex_strs_json = []       
             for index, eqn in enumerate(os.listdir(ce)):
                 temp[eqn] = index
                 file_name = eqn.split(".")[0]
@@ -109,24 +110,23 @@ if __name__ == "__main__":
                         final_string += sub + " "     
                                               
                     Latex_strs_json.append(final_string)
-        
-                    # Making directories and dumping Latex_strs_json
-                    JSON_dir_folder = os.path.join(root, f"JSON_dir/{folder}") 
-                    LargeJSON = os.path.join(JSON_dir_folder, "Large_eqns")
-                    SmallJSON = os.path.join(JSON_dir_folder, "Small_eqns")                          
-                    for JSON in [JSON_dir_folder, LargeJSON, SmallJSON]:
-                        if not os.path.exists(JSON):
-                            subprocess.call(["mkdir", JSON])
-                     
-                    # calling main(arg1, arg2) --> arg1: path to json file containing latex eqns
-                    # args2: path to the json file to store converted mml eqns.      
-                    if ce == Large_correct_eqns:
-                        json.dump(Latex_strs_json, open(os.path.join(LargeJSON, "strings.txt"),"w"))
-                        main(os.path.join(LargeJSON, "strings.txt"), os.path.join(mml_folder, "LargeEqns_MML.txt"))
-                    else:
-                        json.dump(Latex_strs_json, open(os.path.join(SmallJSON, "strings.txt"),"w"))
-                        main(os.path.join(SmallJSON, "strings.txt"), os.path.join(mml_folder, "SmallEqns_MML.txt")) 
                 except:
-                    pass                          
-  
+                    pass
+            # Making directories and dumping Latex_strs_json
+            JSON_dir_folder = os.path.join(root, f"JSON_dir/{folder}") 
+            #LargeJSON = os.path.join(JSON_dir_folder, "Large_eqns")
+            #SmallJSON = os.path.join(JSON_dir_folder, "Small_eqns")                          
+            for JSON in [JSON_dir_folder, LargeJSON, SmallJSON]:
+                if not os.path.exists(JSON):
+                    subprocess.call(["mkdir", JSON])
+
+            # calling main(arg1, arg2) --> arg1: path to json file containing latex eqns
+            # args2: path to the json file to store converted mml eqns.      
+            if ce == Large_correct_eqns:
+                json.dump(Latex_strs_json, open(os.path.join(JSON_dir_folder, "LargeStrings.txt"),"w"))
+                main(os.path.join(JSON_dir_folder, "LargeStrings.txt"), os.path.join(mml_folder, "LargeEqns_MML.txt"))
+            else:
+                json.dump(Latex_strs_json, open(os.path.join(JSON_dir_folder, "SmallStrings.txt"),"w"))
+                main(os.path.join(JSON_dir_folder, "SmallStrings.txt"), os.path.join(mml_folder, "SmallEqns_MML.txt")) 
+                
     json.dump(logs, open("/projects/temporary/automates/er/gaurav/results_file/MathJax_logs.txt", "w"))  
