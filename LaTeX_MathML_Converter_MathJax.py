@@ -25,7 +25,7 @@ def main(folder, eqn_file, mml_path):
         
         # Capturing the keywords not supported by MathJax
         if "FAILED" in res.content.decode("utf-8"):
-            #print("=="*10)
+            # Just to check errors
             Unsupported_Keyword = res.content.decode("utf-8").split("::")[1].split("\\")[-1]
             # Logging incorrect/ unsupported keywords along with their equations
             if Unsupported_Keyword not in keywords_log.keys():
