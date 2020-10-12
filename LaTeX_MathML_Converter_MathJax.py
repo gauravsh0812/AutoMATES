@@ -27,14 +27,15 @@ def main(folder, eqn_file, mml_path):
         # Capturing the keywords not supported by MathJax
         if "FAILED" in res.content.decode("utf-8"):
             # Just to check errors
-            Unsupported_Keyword = res.content.decode("utf-8").split("::")[1]
-            # Logging incorrect/ unsupported keywords along with their equations     
-            if "Undefined control sequence" in Unsupported_Keyword:
-                if Unsupported_Keyword..split("\\")[-1] not in keywords_log.keys():
-                    keywords_log[f"{folder} --> {Unsupported_Keyword}.split("\\")[-1]"] = latex
+            TeXParseError = res.content.decode("utf-8").split("::")[1]
+            # Logging incorrect/ unsupported keywords along with their equations
+            if "Undefined control sequence" in TeXParseError:
+                Unsupported_Keyword = TeXParseError.split("\\")[-1]
+                if Unsupported_Keyword not in keywords_log.keys():
+                    keywords_log[f"{folder} --> {Unsupported_Keyword}"] = latex
             # Logging errors other than unsupported keywords
             else:
-                Errors.append(Unsupported_Keyword)
+                Errors.append(TeXParseError)
 
         # Save the MML text response to our list
         mml_strs.append(res.text)
