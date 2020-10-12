@@ -35,7 +35,8 @@ def main(folder, eqn_file, mml_path):
                     keywords_log[f"{folder} --> {Unsupported_Keyword}"] = latex
             # Logging errors other than unsupported keywords
             else:
-                Errors.append(TeXParseError)
+                if TeXParseError not in Errors:
+                    Errors.append(TeXParseError)
 
         # Save the MML text response to our list
         mml_strs.append(res.text)
