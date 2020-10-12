@@ -5,10 +5,10 @@ import subprocess, os
 import json
 import argparse
 
-# Defining global array to capture all the keywords not supported by MathJax
-keywords_log = []
+# Defining global dictionary to capture all the keywords not supported by MathJax
+keywords_log = {}
 
-def main(eqn_file, mml_path):
+def main(folder, eqn_file, mml_path):
     # Define the webservice address
     webservice = "http://localhost:8081"
     # Load the LaTeX string data
@@ -27,7 +27,9 @@ def main(eqn_file, mml_path):
         if "FAILED" in res.content.decode("utf-8"):
             #print("=="*10)
             Unsupported_Keyword = res.content.decode("utf-8").split("::")[1].split("\\")[-1]
-            keywords_log.append(Unsupported_Keyword)
+            # Logging incorrect/ unsupported keywords along with their equations
+            if Unsupported_Keyword not in keywords_log.keys():
+                keywords_log[f"{folder}_{Unsupported_Keyword}"] = latex
 
         # Save the MML text response to our list
         mml_strs.append(res.text)
@@ -134,10 +136,10 @@ if __name__ == "__main__":
             # args2: path to the json file to store converted mml eqns.      
             if ce == Large_correct_eqns:
                 json.dump(Latex_strs_json, open(os.path.join(JSON_dir_folder, "LargeStrings.txt"),"w"))
-                main(os.path.join(JSON_dir_folder, "LargeStrings.txt"), os.path.join(mml_folder, "LargeEqns_MML.txt"))
+                main(folder, os.path.join(JSON_dir_folder, "LargeStrings.txt"), os.path.join(mml_folder, "LargeEqns_MML.txt"))
             else:
                 json.dump(Latex_strs_json, open(os.path.join(JSON_dir_folder, "SmallStrings.txt"),"w"))
-                main(os.path.join(JSON_dir_folder, "SmallStrings.txt"), os.path.join(mml_folder, "SmallEqns_MML.txt")) 
+                main(folder, os.path.join(JSON_dir_folder, "SmallStrings.txt"), os.path.join(mml_folder, "SmallEqns_MML.txt")) 
      
     print(keywords_log)
     json.dump(keywords_log, open("/projects/temporary/automates/er/gaurav/results_file/MathJax_logs.txt", "w"))  
