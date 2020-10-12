@@ -29,7 +29,7 @@ def main(folder, eqn_file, mml_path):
             Unsupported_Keyword = res.content.decode("utf-8").split("::")[1].split("\\")[-1]
             # Logging incorrect/ unsupported keywords along with their equations
             if Unsupported_Keyword not in keywords_log.keys():
-                keywords_log[f"{folder}_{Unsupported_Keyword}"] = latex
+                keywords_log[f"{folder} --> {Unsupported_Keyword}"] = latex
 
         # Save the MML text response to our list
         mml_strs.append(res.text)
