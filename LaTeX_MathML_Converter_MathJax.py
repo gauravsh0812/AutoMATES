@@ -147,4 +147,9 @@ if __name__ == "__main__":
                 main(folder, os.path.join(JSON_dir_folder, "SmallStrings.txt"), os.path.join(mml_folder, "SmallEqns_MML.txt")) 
      
     print(keywords_log)
-    json.dump(keywords_log, open("/projects/temporary/automates/er/gaurav/results_file/MathJax_logs.txt", "w"))  
+    print(" ")
+    print(" ====================== Errors ======================")
+    print(" ")
+    print(Errors)
+    json.dump(keywords_log, open("/projects/temporary/automates/er/gaurav/results_file/MathJax_Logs/Keywords_logs.txt", "w"))  
+    json.dump(keywords_log, open("/projects/temporary/automates/er/gaurav/results_file/MathJax_Logs/Errors_logs.txt", "w"))  
