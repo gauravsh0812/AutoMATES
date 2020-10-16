@@ -92,11 +92,14 @@ def main(latex_equations, tex_files):
                         CreateTexDoc(eqn[0], keyword_dict, keyword_Macro_dict, TexFolder_Small_Eqn, TeX_name) 
 
 if __name__ == "__main__":
-    # paths
-    base_dir = "/projects/temporary/automates/er/gaurav/results_file"
-    # Latex_equations directory
-    latex_equations = os.path.join(base_dir, "latex_equations")
-    # tex_files dumping directory
-    tex_files = os.path.join(base_dir, "tex_files")
+    for dir in ["1402", "1403", "1404", "1405"]:
+        print(dir)
+        # paths
+        base_dir = f"/projects/temporary/automates/er/gaurav/{dir}_results"
+        # Latex_equations directory
+        latex_equations = os.path.join(base_dir, "latex_equations")
+        # tex_files dumping directory
+        tex_files = os.path.join(base_dir, "tex_files")
     
-    main(latex_equations, tex_files)
+        main(latex_equations, tex_files)
+
