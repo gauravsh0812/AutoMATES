@@ -193,7 +193,7 @@ def List_to_Str(eqn, encoding):
             s += ele
         return s
 
-def Cleaning_writing_eqn(dictionary, Final_EqnNum_LineNum_dict, encoding, tex_folder, LargeFlag):
+def Cleaning_writing_eqn(dir, dictionary, Final_EqnNum_LineNum_dict, encoding, tex_folder, LargeFlag):
     src_latex, eq_dict= [], {}
     for e,line_num in dictionary.items():
         if type(e) is list:
@@ -212,21 +212,22 @@ def Cleaning_writing_eqn(dictionary, Final_EqnNum_LineNum_dict, encoding, tex_fo
                 src_latex.append(cleaned_eq)
                 Final_EqnNum_LineNum_dict[f"eqn{i}"] = eq_dict[eq]
                 if LargeFlag:
-                    with open('/projects/temporary/automates/er/gaurav/results_file/latex_equations/{}/Large_eqns/eqn{}.txt'.format(tex_folder, i), 'w') as file:
+                    with open(f'/projects/temporary/automates/er/gaurav/{dir}_results/latex_equations/{tex_folder}/Large_eqns/eqn{i}.txt', 'w') as file:
                         file.write(cleaned_eq)
                         file.close()
                 else:
-                    with open('/projects/temporary/automates/er/gaurav/results_file/latex_equations/{}/Small_eqns/eqn{}.txt'.format(tex_folder, i), 'w') as file:
+                    with open(f'/projects/temporary/automates/er/gaurav/{dir}_results/latex_equations/{tex_folder}/Small_eqns/eqn{i}.txt', 'w') as file:
                         file.write(cleaned_eq)
                         file.close()
+                        
     return(Final_EqnNum_LineNum_dict)
     
-def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters):
+def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters, dir):
     Total_Parsed_Eqn = 0
     unknown_encoding_tex = []
     # looping through the latex paper directories
     src_path = '/projects/temporary/automates/arxiv/src/'
-    dir_path = os.path.join(src_path, '1401')
+    dir_path = os.path.join(src_path, dir)
     for tex_folder in os.listdir(dir_path):
         
         tex_folder_path = os.path.join(dir_path, tex_folder)
@@ -256,7 +257,7 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
                 brac = 1
 
                 # creating the paper folder
-                root = "/projects/temporary/automates/er/gaurav/results_file"
+                root =f"/projects/temporary/automates/er/gaurav/{dir}_results"
                 paper_dir = os.path.join(root,'latex_equations/{}'.format(tex_folder))
                 if not os.path.exists(paper_dir):
                     call(['mkdir', paper_dir])
@@ -432,12 +433,12 @@ def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_
                 DMOFile.close()
                 
                 # Cleaning and Writing large and small eqns
-                Final_EqnNum_LineNum_dict_large = Cleaning_writing_eqn(Line_largeEqn_dict, Final_EqnNum_LineNum_dict, encoding, tex_folder, LargeFlag=True)
-                Final_EqnNum_LineNum_dict_small = Cleaning_writing_eqn(Line_inlineEqn_dict, Final_EqnNum_LineNum_dict, encoding, tex_folder, LargeFlag=False)
+                Final_EqnNum_LineNum_dict_large = Cleaning_writing_eqn(dir, Line_largeEqn_dict, Final_EqnNum_LineNum_dict, encoding, tex_folder, LargeFlag=True)
+                Final_EqnNum_LineNum_dict_small = Cleaning_writing_eqn(dir, Line_inlineEqn_dict, Final_EqnNum_LineNum_dict, encoding, tex_folder, LargeFlag=False)
                 
                 # Dumping Final_EqnNum_LineNum_dict
-                json.dump(Final_EqnNum_LineNum_dict_large, open(os.path.join(root, f"latex_equations/{tex_folder}/Eqn_LineNum_dict_large.txt", "w")))
-                json.dump(Final_EqnNum_LineNum_dict_small, open(os.path.join(root, f"latex_equations/{tex_folder}/Eqn_LineNum_dict_small.txt", "w")))
+                json.dump(Final_EqnNum_LineNum_dict_large, open(os.path.join(root, f"latex_equations/{tex_folder}/Eqn_LineNum_dict_large.txt"), "w"))
+                json.dump(Final_EqnNum_LineNum_dict_small, open(os.path.join(root, f"latex_equations/{tex_folder}/Eqn_LineNum_dict_small.txt"), "w"))
 
             # if tex has unknown encoding or which can not be converted to some known encoding
             else:
@@ -460,8 +461,10 @@ if __name__ == "__main__":
     df_greek = pd.read_excel(excel_file, 'greek')
     greek_letters = df_greek.iloc[:, 0].values.tolist()
     
-    unknown_encoding_tex = main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters)
-    print("Files with unknown encoding are: ")
-    print(unknown_encoding_tex)
-    # Dumping unknown_encoding_tex
-    json.dump(unknown_encoding_tex, open(os.path.join(root, "unknown_encoding_tex.txt","w" )))
+    for dir in ["1402", "1403", "1404", "1405"]:
+        print(dir)
+        unknown_encoding_tex = main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters, dir)
+        print("Files with unknown encoding are: ")
+        print(unknown_encoding_tex)
+        # Dumping unknown_encoding_tex
+        json.dump(unknown_encoding_tex, open(f"/projects/temporary/automates/er/gaurav/{dir}_results/unknown_encoding_tex.txt","w" ))
