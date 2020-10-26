@@ -1,108 +1,126 @@
-# pdf and png
-import os, subprocess
-import json
-from shutil import copyfile
-from func_timeout import func_timeout, FunctionTimedOut
 
-# for creating pdf files 
-def run_pdflatex(tf, texfile):
-    command = ['pdflatex','-interaction=batchmode', 'nonstopmode',os.path.join(tf,texfile)]
-    output = subprocess.run(command)
-    return output
+# TeX file to pdf converter
+
+import os, subprocess, random
+import logging
+import json
+import multiprocessing
+import time
+
+from multiprocessing import Pool, Lock, TimeoutError
+
+
+# Defining global lock 
+lock = Lock()
+
+# Setting up Logger - To get log files
+Log_Format = '%(levelname)s:%(message)s'
+
+logging.basicConfig(filename = 'tex2png.log', 
+                    level = logging.DEBUG, 
+                    format = Log_Format, 
+                    filemode = 'w')
+
+logger = logging.getLogger()
+
+
+# Function to convert PDFs to PNGs
+def pdf2png(pdf_file, png_name, PNG_dst):
+    
+    global lock 
+    
+    os.chdir(PNG_dst)
+    try:
+        
+        command_args = ['convert','-background', 'white', '-alpha','remove', '-alpha', 'off',
+                        '-density', '200','-quality', '100',pdf_file, f'{PNG_dst}/{png_name}.png']
+        
+        subprocess.Popen(command_args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+
+        # Removing pdf, log and aux file if exist
+
+        os.remove(pdf_file)
+        os.remove(f'{pdf_file.split(".")[0]}.log')      
+        try:  
+            os.remove(f'{pdf_file.split(".")[0]}.aux')
+        except:
+            lock.acquire()              
+            
+            print(f"{pdf_file.split(".")[0]}.aux doesn't exists.")
+            lock.release()
+                  
+    except:
+        lock.acquire()
+        print(f"OOPS!!... This {pdf_file} file couldn't convert to png.")
+        lock.release()
+                  
+# This function will run pdflatex
+def run_pdflatex(run_pdflatex_list):
+    
+    global lock
+    
+    (folder, type_of_folder, texfile, PDF_dst) = run_pdflatex_list
+    
+    lock.acquire()
+    print(" ========== Currently running ==========")
+    print(f"{folder}:{type_of_folder}:{texfile}")
+    lock.release()
+    
+    os.chdir(PDF_dst)
+    command = ['pdflatex', '-interaction=nonstopmode', '-halt-on-error',os.path.join(type_of_folder,texfile)]
+    
+    try:
+        output = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        stdout, stderr = output.communicate(timeout=5)
+        
+        lock.acquire()
+        print(" ============= " * 25)
+        print(stdout)
+        lock.release()
+        
+        # Calling pdf2png
+        pdf2png(f'{texfile.split(".")[0]}.pdf', texfile.split(".")[0], PDF_dst)
+            
+    except TimeoutError:
+        lock.acquire()
+        print(f"{folder}:{type_of_folder}:{texfile} --> Took more than 5 seconds to run.")
+        lock.release()
+        
 
 def main(path):
-    # To collect the incorrect or not working PDFs logs
-    IncorrectPDF_LargeEqn, IncorrectPDF_SmallEqn = {}, {}
     
+    global lock
+        
     # Folder path to TeX files
     TexFolderPath = os.path.join(path, "tex_files")
-    
     for folder in os.listdir(TexFolderPath):
-        # make latex_correct_eqn folders
-        latex_correct_equations_folder = os.path.join(path, f"latex_correct_equations/{folder}")
-        latex_correct_equations_folder_Large = os.path.join(latex_correct_equations_folder, "Large_eqns")
-        latex_correct_equations_folder_Small = os.path.join(latex_correct_equations_folder, "Small_eqns")
-        for F in [latex_correct_equations_folder, latex_correct_equations_folder_Large, latex_correct_equations_folder_Small]:
-            if not os.path.exists(F):
-                subprocess.call(['mkdir',F])
+                
+            # make results PNG directories
+            pdf_dst_root = os.path.join(path, f"latex_images/{folder}")
+            PDF_Large = os.path.join(pdf_dst_root, "Large_eqns")
+            PDF_Small = os.path.join(pdf_dst_root, "Small_eqns")
+            for F in [pdf_dst_root, PDF_Large, PDF_Small]:
+                if not os.path.exists(F):
+                    subprocess.call(['mkdir', F])
 
-        # make results PDF directory
-        eqn_tex_dst_root = os.path.join(path, f"latex_pdf/{folder}")
-        PDF_Large = os.path.join(eqn_tex_dst_root, "Large_eqns_PDFs")
-        PDF_Small = os.path.join(eqn_tex_dst_root, "Small_eqns_PDFs")
-        for F in [eqn_tex_dst_root, PDF_Large, PDF_Small]:
-            if not os.path.exists(F):
-                subprocess.call(['mkdir', F])
-        
-        # Paths to Large and Small TeX files
-        Large_tex_files = os.path.join(TexFolderPath, f"{folder}/Large_eqns")
-        Small_tex_files = os.path.join(TexFolderPath, f"{folder}/Small_eqns")
-        for tf in [Large_tex_files, Small_tex_files]: 
-            for texfile in os.listdir(tf):
-                i = texfile.split(".")[0]
-                OutFlag = False
-                try:
-                    if tf == Large_tex_files:
-                        os.chdir(PDF_Large)
-                        output = func_timeout(5, run_pdflatex, args=(tf, texfile))
-                        OutFlag = True
-                        # Removing log file
-                        os.remove(os.path.join(PDF_Large, f'{i}.log'))
-                    else:
-                        os.chdir(PDF_Small)
-                        output = func_timeout(5, run_pdflatex, args=(tf, texfile))
-                        OutFlag = True
-                        # Removing log file
-                        os.remove(os.path.join(PDF_Small, f'{i}.log'))
+            # Paths to Large and Small TeX files
+            Large_tex_files = os.path.join(TexFolderPath, f"{folder}/Large_eqns")
+            Small_tex_files = os.path.join(TexFolderPath, f"{folder}/Small_eqns")
 
-                except FunctionTimedOut:
-                    print("%s couldn't run within 5 sec"%texfile)
-
-                # copying the tex file to the correct latex eqn directory
-                if OutFlag:
-                    if output.returncode==0:
-                        if tf == Large_tex_files:
-                            copyfile(os.path.join(tf,texfile), os.path.join(os.path.join(latex_correct_equations_folder_Large, f"{texfile}")))
-                        else:
-                            copyfile(os.path.join(tf,texfile), os.path.join(os.path.join(latex_correct_equations_folder_Small, f"{texfile}")))
-                    else:
-                        try:
-                            # Getting line number of the incorrect equation from Eqn_LineNum_dict dictionary got from ParsingLatex
-                            # Due to dumping the dictionary in ParsingLatex.py code, we will treating the dictionary as text file.
-                            Paper_Eqn_number = "{}_{}".format(folder, texfile.split(".")[0])  # Folder#_Eqn# --> e.g. 1401.0700_eqn98
-                            Eqn_Num = "{}".format(texfile.split(".")[0])   # e.g. eqn98
-                            Index = [i for i,c in enumerate(Eqn_LineNum[0].split(",")) if Eqn_Num in c] # Getting Index of item whose keys() has eqn#
-                            Line_Num = Eqn_LineNum[0].split(",")[Index[0]].split(":")[1].strip() # Value() of above Keys()
-                            if tf == Large_tex_files:
-                                IncorrectPDF_LargeEqn[Paper_Eqn_number] = Line_Num
-                            else:
-                                IncorrectPDF_SmallEqn[Paper_Eqn_number] = Line_Num
-                        except:
-                            pass
-                else:
-                    try:
-                        # If file couldn't execute within 5 seconds
-                        Paper_Eqn_number = "{}_{}".format(folder, texfile.split(".")[0])
-                        Eqn_Num = "{}".format(texfile.split(".")[0])
-                        Index = [i for i,c in enumerate(Eqn_LineNum[0].split(",")) if Eqn_Num in c]
-                        Line_Num = Eqn_LineNum[0].split(",")[Index[0]].split(":")[1].strip()
-                        if tf == Large_tex_files:
-                            IncorrectPDF_LargeEqn[Paper_Eqn_number] = Line_Num
-                        else:
-                            IncorrectPDF_SmallEqn[Paper_Eqn_number] = Line_Num
-                    except:
-                        pass
-
-                try:
-                    # Removing aux file if exist
-                    os.remove(os.path.join(PDF_Large, f'{i}.aux')) if tf == Large_tex_files else os.remove(os.path.join(PDF_Small, f'{i}.aux'))
-                except:
-                    pass
-    return(IncorrectPDF_LargeEqn, IncorrectPDF_SmallEqn)
-
+            for type_of_folder in [Large_tex_files, Small_tex_files]: 
+                PDF_dst = PDF_Large if type_of_folder == Large_tex_files else PDF_Small
+            
+                # array to store pairs of [type_of_folder, file in type_of_folder] Will be used as arguments in pool.map            
+                temp = []
+                for texfile in os.listdir(type_of_folder):
+                    temp.append([folder, type_of_folder, texfile, PDF_dst])
+                    
+                with Pool(multiprocessing.cpu_count()-6) as pool:
+                    result = pool.map(run_pdflatex, temp)
+                    
 if __name__ == "__main__":
-    path = "/projects/temporary/automates/er/gaurav/results_file"
-    IncorrectPDF_LargeEqn, IncorrectPDF_SmallEqn = main(path)
-    # Dumping IncorrectPDF logs
-    json.dump(IncorrectPDF_LargeEqn, open("/projects/temporary/automates/er/gaurav/results_file/IncorrectPDF_LargeEqn.txt","w"), indent = 4)
-    json.dump(IncorrectPDF_SmallEqn, open("/projects/temporary/automates/er/gaurav/results_file/IncorrectPDF_SmallEqn.txt","w"), indent = 4)
+    
+    for dir in ["1402", "1403", "1404", "1405"]:
+        print(dir)
+        path = f"/projects/temporary/automates/er/gaurav/{dir}_results"
+        main(path)
