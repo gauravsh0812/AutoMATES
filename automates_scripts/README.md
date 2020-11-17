@@ -4,9 +4,9 @@
 
 -dst (destination path) = '/projects/temporary/automates/er/gaurav' 
 
--dir (List of Directories) = 1401 1402 1403
+-dir (List of Directories) = for example: 1401 1402 1403  
 
--yr (year) = 2014
+-yr (year) = for example: 2014
 
 
 
@@ -17,7 +17,7 @@
 
 -dst (destination path) = '/xdisk/claytonm/projects/automates/er/gaurav' 
 
--dir (List of Directories) = 1401 1402 1403
+-dir (List of Directories) = for example: 1401 1402 1403
 
--yr (year) = 2014
+-yr (year) = for example: 2014
 
