@@ -10,6 +10,32 @@ import pandas as pd
 import json, os
 from subprocess import call
 import subprocess
+import logging
+import multiprocessing
+import time
+
+from multiprocessing import Pool, Lock, TimeoutError
+
+# Printing starting time
+t1 = time.localtime()
+current_time1 = time.strftime("%H:%M:%S", t1)
+print('Starting at:  ', current_time1)
+
+
+# Defining global lock
+lock = Lock()
+
+# Setting up Logger - To get log files
+Log_Format = '%(levelname)s:%(message)s'
+
+logging.basicConfig(filename = '/projects/temporary/automates/er/gaurav/2015/unknown_Tex_Files.log', 
+                    level = logging.DEBUG, 
+                    format = Log_Format, 
+                    filemode = 'w')
+
+logger = logging.getLogger()
+
+    
 ##########################################################################################################################################
 # Parsing latex equations
 ##########################################################################################################################################
@@ -123,15 +149,6 @@ def Clean_eqn_2(eqn_2):
             eqn_2 = eqn_2[:-1]
     except:
         pass
-    
-    # replacing other unnecessary characters
-    #to_replace = ["\n", "%", "\r", "\\bm", "&&"]
-    #for char in to_replace:
-    #   if char in eqn_2:
-    #       try:
-    #            eqn_2 = eqn_2.replace(char, '')
-    #        except:
-    #            pass
 
     # we don't want "&" in the equation as such untill unless it is a matrix
     if "&" in eqn_2:
@@ -193,7 +210,10 @@ def List_to_Str(eqn, encoding):
             s += ele
         return s
 
-def Cleaning_writing_eqn(dir, dictionary, Final_EqnNum_LineNum_dict, encoding, tex_folder, LargeFlag):
+def Cleaning_writing_eqn(root, dictionary, Final_EqnNum_LineNum_dict, encoding, tex_folder, LargeFlag):
+    
+    global lock 
+    
     src_latex, eq_dict= [], {}
     for e,line_num in dictionary.items():
         if type(e) is list:
@@ -212,241 +232,250 @@ def Cleaning_writing_eqn(dir, dictionary, Final_EqnNum_LineNum_dict, encoding, t
                 src_latex.append(cleaned_eq)
                 Final_EqnNum_LineNum_dict[f"eqn{i}"] = eq_dict[eq]
                 if LargeFlag:
-                    with open(f'/projects/temporary/automates/er/gaurav/{dir}_results/latex_equations/{tex_folder}/Large_eqns/eqn{i}.txt', 'w') as file:
+                    with open(os.path.join(root,f'{tex_folder}/Large_eqns/eqn{i}.txt'), 'w') as file:
+                        
+                        lock.acquire()
                         file.write(cleaned_eq)
                         file.close()
+                        lock.release()
+                        
                 else:
-                    with open(f'/projects/temporary/automates/er/gaurav/{dir}_results/latex_equations/{tex_folder}/Small_eqns/eqn{i}.txt', 'w') as file:
+                    with open(os.path.join(root, f'{tex_folder}/Small_eqns/eqn{i}.txt'), 'w') as file:
+                        
+                        lock.acquire()
                         file.write(cleaned_eq)
                         file.close()
+                        lock.release()
                         
     return(Final_EqnNum_LineNum_dict)
     
-def main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters, dir):
-    Total_Parsed_Eqn = 0
-    unknown_encoding_tex = []
-    # looping through the latex paper directories
-    src_path = '/projects/temporary/automates/arxiv/src/'
-    dir_path = os.path.join(src_path, dir)
-    for tex_folder in os.listdir(dir_path):
-        
-        tex_folder_path = os.path.join(dir_path, tex_folder)
-        tex_file = [file for file in os.listdir(tex_folder_path) if ".tex" in file]
-        # considering folders/papers with inly single tex file
-        if len(tex_file) == 1:
-            Tex_doc = os.path.join(tex_folder_path, tex_file[0])
+def main(args_list):
+    
+    global lock
+    
+    # Unpacking args_list
+    (results_folder, matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters, dir_path, tex_folder) = args_list
+    # Tex Folder path
+    tex_folder_path = os.path.join(dir_path, tex_folder)
+    
+    tex_file = [file for file in os.listdir(tex_folder_path) if ".tex" in file]
+    
+    # considering folders/papers with inly single tex file
+    if len(tex_file) == 1:
+        Tex_doc = os.path.join(tex_folder_path, tex_file[0])
 
-            # Finding the type of encoding i.e. utf-8, ISO8859-1, ASCII, etc.   
-            encoding = subprocess.check_output(["file", "-i",Tex_doc ]).decode("utf-8").split()[2].split("=")[1]
-            #print(encoding)
+        # Finding the type of encoding i.e. utf-8, ISO8859-1, ASCII, etc.   
+        encoding = subprocess.check_output(["file", "-i",Tex_doc ]).decode("utf-8").split()[2].split("=")[1]
+        #print(encoding)
 
-            if encoding not in unknown_iconv:
-                file = open(Tex_doc, 'rb')
-                lines = file.readlines()
+        if encoding not in unknown_iconv:
+            file = open(Tex_doc, 'rb')
+            lines = file.readlines()
 
-                # initializing the arrays and variables
-                total_macros = []
-                declare_math_operator = []
-                Line_largeEqn_dict = {}      # For large equations
-                Line_inlineEqn_dict = {}     # For small inline equations
-                Final_EqnNum_LineNum_dict = {}
-                total_equations = []
-                alpha = 0
-                matrix = 0
-                dollar = 1
-                brac = 1
+            # initializing the arrays and variables
+            total_macros = []
+            declare_math_operator = []
+            Line_largeEqn_dict = {}      # For large equations
+            Line_inlineEqn_dict = {}     # For small inline equations
+            Final_EqnNum_LineNum_dict = {}
+            total_equations = []
+            alpha = 0
+            matrix = 0
+            dollar = 1
+            brac = 1
 
-                # creating the paper folder
-                root =f"/projects/temporary/automates/er/gaurav/{dir}_results"
-                paper_dir = os.path.join(root,'latex_equations/{}'.format(tex_folder))
-                if not os.path.exists(paper_dir):
-                    call(['mkdir', paper_dir])
-                  
-                # Making direstories for large and small eqns
-                if not os.path.exists(os.path.join(paper_dir, "Large_eqns")):
-                    call(['mkdir', os.path.join(paper_dir, "Large_eqns")]) 
-                if not os.path.exists(os.path.join(paper_dir, "Small_eqns")):
-                    call(['mkdir', os.path.join(paper_dir, "Small_eqns")]) 
-                
-                # opening files to write Macros and declare math operator
-                MacroFile = open(os.path.join(root, 'latex_equations/{}/Macros_paper.txt'.format(tex_folder)), 'w') 
-                DMOFile = open(os.path.join(root, 'latex_equations/{}/DeclareMathOperator_paper.txt'.format(tex_folder)), 'w')
+            # creating the paper folder
+            root = results_folder
+            paper_dir = os.path.join(root,'{}'.format(tex_folder))
+            if not os.path.exists(paper_dir):
+                call(['mkdir', paper_dir])
+              
+            # Making direstories for large and small eqns
+            if not os.path.exists(os.path.join(paper_dir, "Large_eqns")):
+                call(['mkdir', os.path.join(paper_dir, "Large_eqns")]) 
+            if not os.path.exists(os.path.join(paper_dir, "Small_eqns")):
+                call(['mkdir', os.path.join(paper_dir, "Small_eqns")]) 
+            
+            # opening files to write Macros and declare math operator
+            MacroFile = open(os.path.join(root, '{}/Macros_paper.txt'.format(tex_folder)), 'w') 
+            DMOFile = open(os.path.join(root, '{}/DeclareMathOperator_paper.txt'.format(tex_folder)), 'w')
 
-                # since lines are in bytes, we need to convert them into str    
-                for index, l in enumerate(lines):
-                    line = l.decode(encoding, errors = 'ignore')
+            # since lines are in bytes, we need to convert them into str    
+            for index, l in enumerate(lines):
+                line = l.decode(encoding, errors = 'ignore')
 
-                    # extracting MACROS
-                    if "\\newcommand" in line or "\\renewcommand" in line:
-                        L = Macro(line)
-                        if L is not None:
-                            MacroFile.write(L)             
+                # extracting MACROS
+                if "\\newcommand" in line or "\\renewcommand" in line:
+                    L = Macro(line)
+                    if L is not None:
+                        MacroFile.write(L)             
 
-                    # extract declare math op:erator
-                    if "\\DeclareMathOperator" in line:
-                        DMOFile.write(line)
+                # extract declare math op:erator
+                if "\\DeclareMathOperator" in line:
+                    DMOFile.write(line)
 
-                    # condition 1.a: if $(....)$ is present
-                    # condition 1.b: if $$(....)$$ is present --> replace it with $(---)$
-                    if "$" in line or "$$" in line and alpha == 0:
-                        # if line has any eqn
-                        EqnFlag = True
+                # condition 1.a: if $(....)$ is present
+                # condition 1.b: if $$(....)$$ is present --> replace it with $(---)$
+                if "$" in line or "$$" in line and alpha == 0:
+                    # if line has any eqn
+                    EqnFlag = True
 
-                        if "$$" in line:
-                            line = line.replace("$$", "$")
+                    if "$$" in line:
+                        line = line.replace("$$", "$")
 
-                        #array of the positions of the "$"
-                        length = len([c for c in line if c=="$"])   
+                    #array of the positions of the "$"
+                    length = len([c for c in line if c=="$"])   
 
-                        #length of the above array -- no. of the "$",  if even -- entire equation is in one line. If odd -- equation is going to next line
-                        #if instead of $....$, $.... is present, and upto next 5 lines, no closing "$" can be found, then that condition will be rejected.
-                        if length % 2 == 0:                          
-                            inline_equation = inline(length, line)
+                    #length of the above array -- no. of the "$",  if even -- entire equation is in one line. If odd -- equation is going to next line
+                    #if instead of $....$, $.... is present, and upto next 5 lines, no closing "$" can be found, then that condition will be rejected.
+                    if length % 2 == 0:                          
+                        inline_equation = inline(length, line)
 
-                        else:
-                            # combine the lines
-                            try:
-                                dol = 1
-                                dol_indicator = False
-                                while dol<6: #dollar != 0:
-                                    line = line + lines[index + dol].decode(encoding, errors = "ignore") 
-                                    if "$$" in line:
-                                        line = line.replace("$$", "$") 
+                    else:
+                        # combine the lines
+                        try:
+                            dol = 1
+                            dol_indicator = False
+                            while dol<6: #dollar != 0:
+                                line = line + lines[index + dol].decode(encoding, errors = "ignore") 
+                                if "$$" in line:
+                                    line = line.replace("$$", "$") 
 
-                                    length = len([c for c in line if c=="$"])
-                                    if length%2 != 0:
-                                        dol+=1
-                                    else: 
-                                        dol = 6
-                                        dol_indicator = True
+                                length = len([c for c in line if c=="$"])
+                                if length%2 != 0:
+                                    dol+=1
+                                else: 
+                                    dol = 6
+                                    dol_indicator = True
 
-                                if dol_indicator:
-                                    inline_equation = inline(length, line)
-                                    #print("$ : {}".format(index))
-                                else:
-                                    inline_equation = None
-                            except:
-                                 inline_equation = None
+                            if dol_indicator:
+                                inline_equation = inline(length, line)
+                                #print("$ : {}".format(index))
+                            else:
+                                inline_equation = None
+                        except:
+                             inline_equation = None
 
-                        #check before appending if it is a valid equation
-                        if inline_equation is not None:
-                            r=[sym for sym in relational_operators if (sym in inline_equation)]
-                            if bool(r):# == True:
-                                total_equations.append(inline_equation)
-                                Line_inlineEqn_dict[inline_equation] = index
+                    #check before appending if it is a valid equation
+                    if inline_equation is not None:
+                        r=[sym for sym in relational_operators if (sym in inline_equation)]
+                        if bool(r):# == True:
+                            total_equations.append(inline_equation)
+                            Line_inlineEqn_dict[inline_equation] = index
 
 
-                    # condition 2: if \[....\] is present
-                    if "\\[" in line and alpha == 0:
-                        EqnFlag = True
-                        length_begin = len([c for c in line if c=="\\["])
-                        length_end = len([c for c in line if c=="\\]"])
+                # condition 2: if \[....\] is present
+                if "\\[" in line and alpha == 0:
+                    EqnFlag = True
+                    length_begin = len([c for c in line if c=="\\["])
+                    length_end = len([c for c in line if c=="\\]"])
 
-                        if length_begin == length_end:
+                    if length_begin == length_end:
+                            Bequations = bracket_equation(line)
+                    elif length_begin > length_end:
+                        # combine the lines 
+                        br = 1
+                        while brac != 0:
+                            line = line + lines[index + br].decode(encoding, errors = "ignore")
+                            length_begin = len([c for c in line if c=="\\["])
+                            length_end = len([c for c in line if c=="\\]"])
+                            if length_begin == length_end:
                                 Bequations = bracket_equation(line)
-                        elif length_begin > length_end:
-                            # combine the lines 
-                            br = 1
-                            while brac != 0:
-                                line = line + lines[index + br].decode(encoding, errors = "ignore")
-                                length_begin = len([c for c in line if c=="\\["])
-                                length_end = len([c for c in line if c=="\\]"])
-                                if length_begin == length_end:
-                                    Bequations = bracket_equation(line)
 
-                                    #print(Bequations)
-                                else:
-                                    br+=1
-                        #check before appending if it is a valid equation
-                        if Bequations is not None:
-                            r=[sym for sym in relational_operators if (sym in Bequations)]
-                            if bool(r):# == True:
-                                total_equations.append(Bequations)
-                                Line_inlineEqn_dict[Bequations] = index
+                                #print(Bequations)
+                            else:
+                                br+=1
+                    #check before appending if it is a valid equation
+                    if Bequations is not None:
+                        r=[sym for sym in relational_operators if (sym in Bequations)]
+                        if bool(r):# == True:
+                            total_equations.append(Bequations)
+                            Line_inlineEqn_dict[Bequations] = index
 
 
-                    # condition 3: if \(....\) is present
-                    if "\\(" in line and alpha == 0:
-                        length_begin = len([c for c in line if c=="\\("])
-                        length_end = len([c for c in line if c=="\\)"])
-                        if length_begin == length_end:
+                # condition 3: if \(....\) is present
+                if "\\(" in line and alpha == 0:
+                    length_begin = len([c for c in line if c=="\\("])
+                    length_end = len([c for c in line if c=="\\)"])
+                    if length_begin == length_end:
+                            Pequations = parenthesis_equation(line)
+                    elif length_begin > length_end:
+                        # combine the lines 
+                        br = 1
+                        while brac != 0:
+                            line = line + lines[index + br].decode(encoding, errors = "ignore")
+                            length_begin = len([c for c in line if c=="\\("])
+                            length_end = len([c for c in line if c=="\\)"])
+                            if length_begin == length_end:
                                 Pequations = parenthesis_equation(line)
-                        elif length_begin > length_end:
-                            # combine the lines 
-                            br = 1
-                            while brac != 0:
-                                line = line + lines[index + br].decode(encoding, errors = "ignore")
-                                length_begin = len([c for c in line if c=="\\("])
-                                length_end = len([c for c in line if c=="\\)"])
-                                if length_begin == length_end:
-                                    Pequations = parenthesis_equation(line)
-                                    #print("\\[] : {}".format(index))
-                                    #print(equations)
-                                else:
-                                    br+=1
-                        #check before appending if it is a valid equation
-                        if Pequations is not None:
-                            r=[sym for sym in relational_operators if (sym in Pequations)]
-                            if bool(r):# == True:
-                                total_equations.append(Pequations)
-                                Line_inlineEqn_dict[Pequations] = index
+                                #print("\\[] : {}".format(index))
+                                #print(equations)
+                            else:
+                                br+=1
+                    #check before appending if it is a valid equation
+                    if Pequations is not None:
+                        r=[sym for sym in relational_operators if (sym in Pequations)]
+                        if bool(r):# == True:
+                            total_equations.append(Pequations)
+                            Line_inlineEqn_dict[Pequations] = index
 
-                    # condition 4: if \begin{equation(*)} \begin{case or split} --- \end{equation(*)} \begin{case or split}
-                    # comdition 5: if \begin{equation(*)} --- \end{equation(*)}
-                    for ec in equation_cmds:
-                        if "\\begin{}".format(ec) in line: #or "\\begin{equation*}" in line or "\\begin{align}" in line or "\\begin{align*}" in line or "\\begin{eqnarray}" in line or "\\begin{eqnarray*}" in line or "\\begin{displaymath}" in line:
-                            begin_index_alpha = index+1
-                            alpha = 1 
-                            #print("\\begin eqtn : {}".format(index))
+                # condition 4: if \begin{equation(*)} \begin{case or split} --- \end{equation(*)} \begin{case or split}
+                # comdition 5: if \begin{equation(*)} --- \end{equation(*)}
+                for ec in equation_cmds:
+                    if "\\begin{}".format(ec) in line: #or "\\begin{equation*}" in line or "\\begin{align}" in line or "\\begin{align*}" in line or "\\begin{eqnarray}" in line or "\\begin{eqnarray*}" in line or "\\begin{displaymath}" in line:
+                        begin_index_alpha = index+1
+                        alpha = 1 
+                        #print("\\begin eqtn : {}".format(index))
 
-                    for ec in equation_cmds:
-                        if "\\end{}".format(ec) in line and alpha == 1 : # or "\\end{equation*}" in line or "\\end{align}" in line or "\\end{align*}" in line or "\\end{eqnarray}" in line or "\\end{eqnarray*}" in line or "\\end{displaymath}" in line :
-                            end_index_alpha = index
-                            alpha =0
-                            #print("\\endeqtn : {}".format(index))
+                for ec in equation_cmds:
+                    if "\\end{}".format(ec) in line and alpha == 1 : # or "\\end{equation*}" in line or "\\end{align}" in line or "\\end{align*}" in line or "\\end{eqnarray}" in line or "\\end{eqnarray*}" in line or "\\end{displaymath}" in line :
+                        end_index_alpha = index
+                        alpha =0
+                        #print("\\endeqtn : {}".format(index))
 
-                            equation = lines[begin_index_alpha : end_index_alpha]
-                            eqn = ''
-                            for i in range(len(equation)):
-                                eqn = eqn + equation[i].decode(encoding, errors = "ignore")
-                            total_equations.append(eqn)
-                            Line_largeEqn_dict[eqn] = index
+                        equation = lines[begin_index_alpha : end_index_alpha]
+                        eqn = ''
+                        for i in range(len(equation)):
+                            eqn = eqn + equation[i].decode(encoding, errors = "ignore")
+                        total_equations.append(eqn)
+                        Line_largeEqn_dict[eqn] = index
 
-                    # condition 6: if '\\begin{..matrix(*)}' but independent under condition 4
-                    for mc in matrix_cmds:
-                        if "\\begin{}".format(mc) in line and alpha == 0:
-                            matrix = 1
-                            begin_matrix_index = index
-                            #print("\\begin mat : {}".format(index))
+                # condition 6: if '\\begin{..matrix(*)}' but independent under condition 4
+                for mc in matrix_cmds:
+                    if "\\begin{}".format(mc) in line and alpha == 0:
+                        matrix = 1
+                        begin_matrix_index = index
+                        #print("\\begin mat : {}".format(index))
 
-                        if "\\end{}".format(mc) in line and matrix == 1:
-                            end_matrix_index = index
-                            matrix =0
-                            #print("\\end mat : {}".format(index))
+                    if "\\end{}".format(mc) in line and matrix == 1:
+                        end_matrix_index = index
+                        matrix =0
+                        #print("\\end mat : {}".format(index))
 
-                            # append the array with the recet equation along with the \\begin{} and \\end{} statements
-                            equation = lines[begin_matrix_index : end_matrix_index+1]
-                            total_equations.append(equation)
-                            Line_largeEqn_dict[List_to_Str(equation, encoding)] = index
+                        # append the array with the recet equation along with the \\begin{} and \\end{} statements
+                        equation = lines[begin_matrix_index : end_matrix_index+1]
+                        total_equations.append(equation)
+                        Line_largeEqn_dict[List_to_Str(equation, encoding)] = index
 
-                MacroFile.close()
-                DMOFile.close()
-                
-                # Cleaning and Writing large and small eqns
-                Final_EqnNum_LineNum_dict_large = Cleaning_writing_eqn(dir, Line_largeEqn_dict, Final_EqnNum_LineNum_dict, encoding, tex_folder, LargeFlag=True)
-                Final_EqnNum_LineNum_dict_small = Cleaning_writing_eqn(dir, Line_inlineEqn_dict, Final_EqnNum_LineNum_dict, encoding, tex_folder, LargeFlag=False)
-                
-                # Dumping Final_EqnNum_LineNum_dict
-                json.dump(Final_EqnNum_LineNum_dict_large, open(os.path.join(root, f"latex_equations/{tex_folder}/Eqn_LineNum_dict_large.txt"), "w"))
-                json.dump(Final_EqnNum_LineNum_dict_small, open(os.path.join(root, f"latex_equations/{tex_folder}/Eqn_LineNum_dict_small.txt"), "w"))
+            MacroFile.close()
+            DMOFile.close()
+            
+            # Cleaning and Writing large and small eqns
+            Final_EqnNum_LineNum_dict_large = Cleaning_writing_eqn(root, Line_largeEqn_dict, Final_EqnNum_LineNum_dict, encoding, tex_folder, LargeFlag=True)
+            Final_EqnNum_LineNum_dict_small = Cleaning_writing_eqn(root, Line_inlineEqn_dict, Final_EqnNum_LineNum_dict, encoding, tex_folder, LargeFlag=False)
+            
+            # Dumping Final_EqnNum_LineNum_dict
+            json.dump(Final_EqnNum_LineNum_dict_large, open(os.path.join(root, f"{tex_folder}/Eqn_LineNum_dict_large.txt"), "w"))
+            json.dump(Final_EqnNum_LineNum_dict_small, open(os.path.join(root, f"{tex_folder}/Eqn_LineNum_dict_small.txt"), "w"))
+                        
+        # if tex has unknown encoding or which can not be converted to some known encoding
+        else:
+            # Log the tex_folder that has unknown encoding
+            logger.debug(tex_folder)
 
-            # if tex has unknown encoding or which can not be converted to some known encoding
-            else:
-                unknown_encoding_tex.append(tex_folder)
-
-    return(unknown_encoding_tex)
 
 if __name__ == "__main__":
+    
     # possible matrix and equation keyword that can be used in LaTeX source codes
     matrix_cmds   = ['{matrix}', '{matrix*}', '{bmatrix}', '{bmatrix*}', '{Bmatrix}', '{Bmatrix*}', '{vmatrix}', '{vmatrix*}', '{Vmatrix}', '{Vmatrix*}']
     equation_cmds = ['{equation}', '{equation*}', '{align}', '{align*}', '{eqnarray}', '{eqnarray*}', '{displaymath}']
@@ -461,10 +490,40 @@ if __name__ == "__main__":
     df_greek = pd.read_excel(excel_file, 'greek')
     greek_letters = df_greek.iloc[:, 0].values.tolist()
     
-    for dir in ["1402", "1403", "1404", "1405"]:
-        print(dir)
-        unknown_encoding_tex = main(matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters, dir)
-        print("Files with unknown encoding are: ")
-        print(unknown_encoding_tex)
-        # Dumping unknown_encoding_tex
-        json.dump(unknown_encoding_tex, open(f"/projects/temporary/automates/er/gaurav/{dir}_results/unknown_encoding_tex.txt","w" ))
+    # looping through the latex paper directories
+    src_path = '/projects/temporary/automates/arxiv/src'
+    
+    # Considering only 2015 directories
+    Dir_2015 = ['1501', '1502', '1503', '1504',
+                '1505', '1506', '1507', '1508',
+                '1509', '1510', '1511', '1512']
+    
+    # Looping through 2015 directories
+    for DIR in os.listdir(src_path):
+        
+        if DIR in Dir_2015:
+            
+            # Print Directory 
+            lock.acquire()
+            print("DIR:  ", DIR)
+            lock.release()
+            
+            # Paths to source directory, results directory, and results folders 
+            dir_path = os.path.join(src_path, DIR)
+            results_dir = f'/projects/temporary/automates/er/gaurav/2015/{DIR}'
+            results_folder = os.path.join(results_dir, 'latex_equations')
+            
+            for F in [results_dir, results_folder]:
+                if not os.path.exists(F):
+                    subprocess.call(['mkdir', F])
+            
+            # Create 'temp' array to store various arrays of arguments 
+            # that will be provided to multiprocessing pooling
+            temp = []
+            
+            for tex_folder in os.listdir(dir_path):
+                temp.append([results_folder, matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters, dir_path, tex_folder])
+            
+            # Pooling the process to half of the total cores
+            with Pool(multiprocessing.cpu_count()//2) as pool:
+                pool.map(main, temp)    
