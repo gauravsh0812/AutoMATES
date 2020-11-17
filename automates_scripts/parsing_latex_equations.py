@@ -27,7 +27,7 @@ lock = Lock()
 parser = argparse.ArgumentParser(description='Parsing LaTeX equations from arxiv source codes')
 parser.add_argument('-src', '--source', type=str, metavar='', required=True, help='Source path to arxiv folder')
 parser.add_argument('-dst', '--destination', type=str, metavar='', required=True, help='Destination directory --> username directory')
-parser.add_argument('-dir', '--directories', type=list, metavar='', required=True, help='List of directories to run')
+parser.add_argument('-dir', '--directories', nargs='+', type=int, metavar='', required=True, help='List of directories to run')
 parser.add_argument('-yr', '--year', type=str, metavar='', required=True, help='year of the directories')
 
 group = parser.add_mutually_exclusive_group()
@@ -503,7 +503,9 @@ if __name__ == "__main__":
     src_path = args.source
     
     for DIR in args.directories:
-                
+        
+        DIR = src(DIR)
+       
         if args.verbose:
             lock.acquire()
             print("DIR:  ", DIR)
