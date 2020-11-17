@@ -12,18 +12,27 @@ from subprocess import call
 import subprocess
 import logging
 import multiprocessing
-import time
 
+from datetime import datetime
 from multiprocessing import Pool, Lock, TimeoutError
 
 # Printing starting time
-t1 = time.localtime()
-current_time1 = time.strftime("%H:%M:%S", t1)
-print('Starting at:  ', current_time1)
-
+start_time = datetime.now()
+print('Starting at:  ', start_time)
 
 # Defining global lock
 lock = Lock()
+
+# Argument Parser
+parser = argparse.ArgumentParser(description='Parsing LaTeX equations from arxiv source codes')
+parser.add_argument('-src', '--source', type=str, metavar='', required=True, help='Source path to arxiv folder')
+parser.add_argument('-dst', '--destination', type=str, metavar='', required=True, help='Destination directory --> username directory')
+parser.add_argument('-dir', '--directories', type=list, metavar='', required=True, help='List of directories to run')
+parser.add_argument('-yr', '--year', type=str, metavar='', required=True, help='year of the directories')
+
+group = parser.add_mutually_exclusive_group()
+group.add_argument('-v', '--verbose', action='store_true', help='print verbose')
+args = parser.parse_args()
 
 # Setting up Logger - To get log files
 Log_Format = '%(levelname)s:%(message)s'
@@ -491,39 +500,37 @@ if __name__ == "__main__":
     greek_letters = df_greek.iloc[:, 0].values.tolist()
     
     # looping through the latex paper directories
-    src_path = '/projects/temporary/automates/arxiv/src'
+    src_path = args.source
     
-    # Considering only 2015 directories
-    Dir_2015 = ['1501', '1502', '1503', '1504',
-                '1505', '1506', '1507', '1508',
-                '1509', '1510', '1511', '1512']
-    
-    # Looping through 2015 directories
-    for DIR in os.listdir(src_path):
-        
-        if DIR in Dir_2015:
-            
-            # Print Directory 
+    for DIR in args.directories:
+                
+        if args.verbose:
             lock.acquire()
             print("DIR:  ", DIR)
             lock.release()
+        
+        dir_path = os.path.join(src_path, DIR)
+        
+        destination = args.destination
+        results_dir = os.path.join(destination, args.year)
+        results_folder = os.path.join(results_dir, DIR)
+        latex_equations = os.path.join(results_dir, 'latex_equations')
             
-            # Paths to source directory, results directory, and results folders 
-            dir_path = os.path.join(src_path, DIR)
-            results_dir = f'/projects/temporary/automates/er/gaurav/2015/{DIR}'
-            results_folder = os.path.join(results_dir, 'latex_equations')
+        for F in [results_dir, results_folder, latex_equations]:
+            if not os.path.exists(F):
+                subprocess.call(['mkdir', F])
+
+        temp = []
+        
+        for tex_folder in os.listdir(dir_path):
+
+            temp.append([latex_equations, matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters, dir_path, tex_folder])
             
-            for F in [results_dir, results_folder]:
-                if not os.path.exists(F):
-                    subprocess.call(['mkdir', F])
-            
-            # Create 'temp' array to store various arrays of arguments 
-            # that will be provided to multiprocessing pooling
-            temp = []
-            
-            for tex_folder in os.listdir(dir_path):
-                temp.append([results_folder, matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters, dir_path, tex_folder])
-            
-            # Pooling the process to half of the total cores
-            with Pool(multiprocessing.cpu_count()//2) as pool:
-                pool.map(main, temp)    
+        with Pool(multiprocessing.cpu_count()//2) as pool:
+            pool.map(main, temp)   
+
+    # Printing stoping time
+    stop_time = datetime.now()
+    print('Stoping at:  ', stop_time)
+    print(' ')
+    print('parsing latex equations completed.')
