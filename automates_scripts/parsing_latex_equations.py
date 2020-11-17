@@ -516,7 +516,7 @@ if __name__ == "__main__":
         destination = args.destination
         results_dir = os.path.join(destination, args.year)
         results_folder = os.path.join(results_dir, DIR)
-        latex_equations = os.path.join(results_dir, 'latex_equations')
+        latex_equations = os.path.join(results_folder, 'latex_equations')
             
         for F in [results_dir, results_folder, latex_equations]:
             if not os.path.exists(F):
