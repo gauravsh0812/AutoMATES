@@ -2,7 +2,7 @@
 
 -src (source_path) = '/projects/temporary/automates/arxiv/src'
 
--dst (destination path) = '/projects/temporary/automates/er/gaurav/2014' 
+-dst (destination path) = '/projects/temporary/automates/er/gaurav' 
 
 -dir (List of Directories) = 1401 1402 1403
 
@@ -15,7 +15,7 @@
 
 -src (source_path) = '/xdisk/claytonm/projects/automates/arxiv/src'
 
--dst (destination path) = '/xdisk/claytonm/projects/automates/er/gaurav/2014' 
+-dst (destination path) = '/xdisk/claytonm/projects/automates/er/gaurav' 
 
 -dir (List of Directories) = 1401 1402 1403
 
