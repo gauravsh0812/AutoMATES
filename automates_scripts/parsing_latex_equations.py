@@ -38,7 +38,9 @@ args = parser.parse_args()
 # Setting up Logger - To get log files
 Log_Format = '%(levelname)s:%(message)s'
 
-logging.basicConfig(filename = '/projects/temporary/automates/er/gaurav/2015/unknown_Tex_Files.log', 
+logFile_dst = os.path.join(args.destination, str(args.year))
+
+logging.basicConfig(filename = os.path.join(logFile_dst, 'unknown_Tex_Files.log'),  
                     level = logging.DEBUG, 
                     format = Log_Format, 
                     filemode = 'w')
@@ -505,7 +507,7 @@ if __name__ == "__main__":
     
     for DIR in args.directories:
         
-        DIR = src(DIR)
+        DIR = str(DIR)
        
         if args.verbose:
             lock.acquire()
