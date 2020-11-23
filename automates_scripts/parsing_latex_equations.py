@@ -272,6 +272,7 @@ def main(args_list):
     
     if args.verbose:
         lock.acquire()
+        print(' ')
         print('Running tex folder: ', tex_folder)
         lock.release()
         
