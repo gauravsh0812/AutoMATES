@@ -13,6 +13,7 @@ import subprocess
 import logging
 import multiprocessing
 import argparse
+import chardet
 
 from datetime import datetime
 from multiprocessing import Pool, Lock, TimeoutError
