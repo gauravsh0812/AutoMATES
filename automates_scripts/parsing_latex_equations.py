@@ -266,23 +266,37 @@ def main(args_list):
     global lock
     
     # Unpacking args_list
-    (results_folder, matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters, dir_path, tex_folder) = args_list
+    (latex_equations, matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters, dir_path, tex_folder) = args_list
     # Tex Folder path
     tex_folder_path = os.path.join(dir_path, tex_folder)
     
+    if args.verbose:
+        lock.acquire()
+        print('Running tex folder: ', tex_folder)
+        lock.release()
+        
     tex_file = [file for file in os.listdir(tex_folder_path) if ".tex" in file]
     
     # considering folders/papers with inly single tex file
     if len(tex_file) == 1:
+        
         Tex_doc = os.path.join(tex_folder_path, tex_file[0])
-
+        file = open(Tex_doc, 'rb')
+        lines = file.readlines()
+        encoding = chardet.detect(lines[0])['encoding']
+        
+        if args.verbose:
+            lock.acquire()
+            print('Encoding of the file:  ',encoding)
+            lock.release()
+            
         # Finding the type of encoding i.e. utf-8, ISO8859-1, ASCII, etc.   
-        encoding = subprocess.check_output(["file", "-i",Tex_doc ]).decode("utf-8").split()[2].split("=")[1]
+        #encoding = subprocess.check_output(["file", "-i",Tex_doc ]).decode("utf-8").split()[2].split("=")[1]
         #print(encoding)
 
         if encoding not in unknown_iconv:
-            file = open(Tex_doc, 'rb')
-            lines = file.readlines()
+            #file = open(Tex_doc, 'rb')
+            #lines = file.readlines()
 
             # initializing the arrays and variables
             total_macros = []
@@ -297,7 +311,7 @@ def main(args_list):
             brac = 1
 
             # creating the paper folder
-            root = results_folder
+            root = latex_equations
             paper_dir = os.path.join(root,'{}'.format(tex_folder))
             if not os.path.exists(paper_dir):
                 call(['mkdir', paper_dir])
@@ -496,7 +510,7 @@ if __name__ == "__main__":
     unknown_iconv = ["unknown-8bit", "binary"]
 
     # get symbols, greek letter, and encoding list 
-    excel_file = '/home/gauravs/Automates/automates_scripts/Latex_symbols.xlsx'
+    excel_file = '/home/u17/gauravs/Automates/automates_scripts/Latex_symbols.xlsx'
     df = pd.read_excel(excel_file, 'rel_optr')
     relational_operators = df.iloc[:, 0].values.tolist()
     df_greek = pd.read_excel(excel_file, 'greek')
@@ -509,18 +523,21 @@ if __name__ == "__main__":
         
         DIR = str(DIR)
        
-        if args.verbose:
-            lock.acquire()
-            print("DIR:  ", DIR)
-            lock.release()
-        
         dir_path = os.path.join(src_path, DIR)
         
         destination = args.destination
         results_dir = os.path.join(destination, args.year)
         results_folder = os.path.join(results_dir, DIR)
         latex_equations = os.path.join(results_folder, 'latex_equations')
-            
+        
+        if args.verbose:
+            lock.acquire()
+            print(' ===++=== '*15)
+            print('Directory: ', DIR)
+            print('Path to directoty: ', dir_path)
+            print('Results folder: ', latex_equations)
+            lock.release()
+        
         for F in [results_dir, results_folder, latex_equations]:
             if not os.path.exists(F):
                 subprocess.call(['mkdir', F])
@@ -531,7 +548,7 @@ if __name__ == "__main__":
 
             temp.append([latex_equations, matrix_cmds, equation_cmds, unknown_iconv, relational_operators, greek_letters, dir_path, tex_folder])
             
-        with Pool(multiprocessing.cpu_count()//2) as pool:
+        with Pool(multiprocessing.cpu_count()) as pool:
             pool.map(main, temp)   
 
     # Printing stoping time
