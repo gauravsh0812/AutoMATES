@@ -110,9 +110,7 @@ def run_pdflatex(run_pdflatex_list):
     os.chdir(PDF_dst)
     command = ['pdflatex', '-interaction=nonstopmode', '-halt-on-error', os.path.join(type_of_folder,texfile)]
     
-    #try:
     output = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    #stdout, stderr = output.communicate(timeout=5)
     my_timer = Timer(5, kill, [output])
     
     try:
@@ -120,7 +118,7 @@ def run_pdflatex(run_pdflatex_list):
         stdout, stderr = output.communicate()
         
         # Calling pdf2png
-        pdf2png(folder, f'{texfile.split(".")[0]}.pdf', texfile.split(".")[0], PDF_dst)
+        pdf2png(folder, f'{texfile.split(".")[0]}.pdf', texfile.split(".")[0], PDF_dst, type_of_folder)
     
     finally:
         my_timer.cancel()
