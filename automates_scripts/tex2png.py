@@ -27,6 +27,8 @@ parser.add_argument('-src', '--source', type=str, metavar='', required=True, hel
 parser.add_argument('-dir', '--directories', nargs="+",type=int, metavar='', required=True, help='directories to run seperated by space')
 parser.add_argument('-yr', '--year', type=int, metavar='', required=True, help='year of the directories')
 
+group = parser.add_mutually_exclusive_group()
+group.add_argument('-v', '--verbose', action='store_true', help='print verbose')
 args = parser.parse_args()
 
 
