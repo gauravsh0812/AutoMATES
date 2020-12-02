@@ -44,8 +44,9 @@ logger = logging.getLogger()
 
 
 # Function to kill process if TimeoutError occurs
-#kill = lambda process: process.kill()
-def kill():
+kill = lambda process: process.kill()
+'''
+#def kill():
     
     lambda process: process.kill()
     
@@ -55,6 +56,7 @@ def kill():
         lock.release()
    
     logger.warning(f"{folder}:{type_of_folder}:{texfile} --> Took more than 5 seconds to run.")
+'''
 
 # Function to convert PDFs to PNGs
 def pdf2png(folder, pdf_file, png_name, PNG_dst, type_of_folder):
