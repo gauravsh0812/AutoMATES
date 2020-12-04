@@ -121,7 +121,7 @@ def main(args_list):
             TeX_name = File.split(".")[0]
             # calling function to create tex doc for the particular folder --> giving all latex eqns, DMOs, Macros and tex_folder path as arguments
             if len(eqn)!=0:
-                if Path == "LargeEqn_Path":
+                if Path == LargeEqn_Path:
                     CreateTexDoc(eqn[0], keyword_dict, keyword_Macro_dict, TexFolder_Large_Eqn, TeX_name)
                 else:
                     CreateTexDoc(eqn[0], keyword_dict, keyword_Macro_dict, TexFolder_Small_Eqn, TeX_name)
