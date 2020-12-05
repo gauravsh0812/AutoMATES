@@ -7,27 +7,45 @@ import json
 import argparse
 import multiprocessing
 import logging 
+import home.gauravs.Automates.automates_scripts.mathml_simplification as mmlsimplification
+import argparse
 
+from datetime import datetime
 from multiprocessing import Pool, Lock, TimeoutError
+
+# Printing starting time
+print(' ')
+start_time = datetime.now()
+print('Starting at:  ', start_time)
 
 # Defining global lock
 lock = Lock()
 
-# Defining the rot directory to store log files
-root = f"/projects/temporary/automates/er/gaurav/{dir}_results"
+# Argument Parser
+parser = argparse.ArgumentParser(description='Parsing LaTeX equations from arxiv source codes')
+parser.add_argument('-src', '--source', type=str, metavar='', required=True, help='Source path to arxiv folder')
+parser.add_argument('-dir', '--directories', nargs="+",type=int, metavar='', required=True, help='directories to run seperated by space')
+parser.add_argument('-yr', '--year', type=int, metavar='', required=True, help='year of the directories')
+
+group = parser.add_mutually_exclusive_group()
+group.add_argument('-v', '--verbose', action='store_true', help='print verbose')
+args = parser.parse_args()
+
 
 # Setting up Logger - To get log files
 Log_Format = '%(levelname)s:%(message)s'
 
-logger_keywords = logging.getLogger(os.path.join( root, 'MathJax_Unsupported_Keywords'))
-logger_errors = logging.getLogger(os.path.join(root, 'MathJax_Errors'))
+logFile_dst = os.path.join(args.source, str(args.year))
+
+logger_keywords = logging.getLogger(os.path.join(logFile_dst, f'{args.directories}-MathJax_Unsupported_Keywords'))
+logger_errors = logging.getLogger(os.path.join(logFile_dst, f'{args.directories}-MathJax_Errors'))
 
 ## Setting the levels of loggers
 logger_keywords.setLevel(logging.WARNING)
 logger_errors.setLevel(logging.WARNING)
 
 ## Adding file handler
-fh = logging.FileHandler('MathJax_MML.log')
+fh = logging.FileHandler(f'{args.directories}-MathJax_MML.log')
 fh.setLevel(logging.WARNING)
 
 ## Setting up the format
@@ -39,67 +57,6 @@ logger_keywords.addHandler(fh)
 logger_errors.addHandler(fh)
 
 
-
-# Defining global dictionary and array to capture all the keywords not supported by MathJax and other erros respectively
-#keywords_log =[]
-#Errors = []
-
-def main(file_name, final_eqn, tempPath, mml_path):
-    
-    global lock
-    
-    # Define the webservice address
-    webservice = "http://localhost:8081"
-    # Load the LaTeX string data
-    #eqn = json.load(open(tempPath, "r"))
-    eqn = final_eqn
-    
-    lock.acquire()
-    print(f"in main: {file_name}")
-    print(eqn)
-    lock.release()
-    # Translate and save each LaTeX string using the NodeJS service for MathJax
-    
-    res = requests.post(
-        f"{webservice}/tex2mml",
-        headers={"Content-type": "application/json"},
-        json={"tex_src": json.dumps(eqn)},
-         )
-    
-    lock.acquire()
-    #print(f'Response of the webservice request: {res.text}')
-    lock.release()
-    
-    # Capturing the keywords not supported by MathJax
-    if "FAILED" in res.content.decode("utf-8"):
-        # Just to check errors
-        TeXParseError = res.content.decode("utf-8").split("::")[1]
-        # Logging incorrect/ unsupported keywords along with their equations
-        if "Undefined control sequence" in TeXParseError:
-            Unsupported_Keyword = TeXParseError.split("\\")[-1]
-            #if Unsupported_Keyword not in keywords_log:
-                #keywords_log.append(Unsupported_Keyword)
-            logger_keywords.warning(f'{Unsupported_Keyword} is either not supported by MathJax or incorrectly written.')
-            #print("FAILED")
-        # Logging errors other than unsupported keywords
-        else:
-            #if TeXParseError not in Errors:
-                #Errors.append(TeXParseError)
-            logger_errors.warning(f'{TeXParseError} is an error produced by MathJax webserver.')
-                
-    else:
-        # Cleaning and Dumping the MathML strings to JSON file
-        MML = CleaningMML(res.text)
-        print(f"writing {file_name}")
-        
-        MML_output = open(os.path.join(mml_path, f"{file_name}.txt"), "w")
-        
-        lock.acquire()
-        #json.dump(MML, open(os.path.join(mml_path, f"{file_name}.txt"), "w"))
-        MML_output.write(MML)
-        lock.release()
-        
-        
 def Creating_Macro_DMO_dictionaries(folder):
     
     Macro_file = os.path.join(root, f"latex_equations/{folder}/Macros_paper.txt")
@@ -123,17 +80,13 @@ def Creating_Macro_DMO_dictionaries(folder):
     
     return(keyword_Macro_dict, keyword_dict)
     
-    # Calling function to create final strings of eqns having respective Macros and DMOs
-    #Creating_final_equations(type_of_folder, dir, folder, keyword_Macro_dict, keyword_dict, Large_MML, Small_MML)
-    
-    
 
 def Creating_final_equations(args_list):
     
     global lock
    
     # Unpacking the args_list
-    (type_of_folder, eqn, dir, folder, keyword_Macro_dict, keyword_dict, Large_MML, Small_MML) = args_list
+    (type_of_folder, eqn, DIR, folder, keyword_Macro_dict, keyword_dict, Large_MML, Small_MML) = args_list
     
     try:
         file_name = eqn.split(".")[0] if '-' not in eqn else eqn.split('-')[0]
@@ -176,31 +129,36 @@ def Creating_final_equations(args_list):
             final_eqn += sub + " "     
         
         # Printing the final equation string
-        
         lock.acquire()
-        #print("final equation is  ", final_eqn)
+        if args.verbose:
+            print("final equation is  ", final_eqn)
         lock.release()
         
         # Storing the final equation in a temporary json file
-        tempPath = f"/projects/temporary/automates/er/gaurav/{dir}_results/tempFile.txt"
+        year = str(args.year)
+        tempPath = os.path.join(src_path, f'{year}')
         
         lock.acquire()
+        if args.verbose:
+            print('The final equation: ')
+            print(final_eqn)
+            
         json.dump(final_eqn, open(tempPath, "w"))
         lock.release()
         
-        MML = Large_MML if EqnsType == "Large_eqns" else Small_MML
-        #print(" ==================================================")
-        print(MML)
+        MML = Large_MML if type_of_folder == Large_eqns else Small_MML
+        
+        # Calling "main" function
         main(file_name, final_eqn, tempPath, MML)
 
     except:
     
         lock.acquire()
-        print( " " )
-        print(" ======================START============================")
-        print(f' {folder}:{type_of_folder}:{file_name} can not be converted.')
-        print(" =======================END=============================")
-        print( " " )
+        if args.verbose:
+          print( " " )
+          print(f' {folder}:{type_of_folder}:{file_name} can not be converted.')
+        
+        logger.warning(f'{folder}:{type_of_folder}:{file_name} can not be converted.')
         lock.release()
             
 
@@ -214,15 +172,78 @@ def CleaningMML(res):
     res = res.replace(">\\n", ">")
     return(res)
     
+def main(file_name, tempPath, mml_path):
+    
+    global lock
+    
+    # Define the webservice address
+    webservice = "http://localhost:8081"
+    # Load the LaTeX string data
+    eqn = json.load(open(tempPath, "r"))
+    
+    # Translate and save each LaTeX string using the NodeJS service for MathJax
+    res = requests.post(
+        f"{webservice}/tex2mml",
+        headers={"Content-type": "application/json"},
+        json={"tex_src": json.dumps(eqn)},
+         )
+    
+    lock.acquire()
+    if args.verbose:
+        print('Converting latex equation to MathML using MathJax webserver....')
+        print(' ')
+        print(f'Response of the webservice request: {res.text}')
+    lock.release()
+    
+    # Capturing the keywords not supported by MathJax
+    if "FAILED" in res.content.decode("utf-8"):
+        # Just to check errors
+        TeXParseError = res.content.decode("utf-8").split("::")[1]
+        
+        # Logging incorrect/ unsupported keywords along with their equations
+        if "Undefined control sequence" in TeXParseError:
+            Unsupported_Keyword = TeXParseError.split("\\")[-1]
+            
+            lock.acquire()
+            if args.verbose:
+                print(f'{Unsupported_Keyword} is either not supported by MathJax or incorrectly written.')
+                
+            logger_keywords.warning(f'{Unsupported_Keyword} is either not supported by MathJax or incorrectly written.')
+            lock.release()
+            
+        # Logging errors other than unsupported keywords
+        else:
+            lock.acquire()
+            if args.verbose:
+                print(f'{TeXParseError} is an error produced by MathJax webserver.')
+                
+            logger_errors.warning(f'{TeXParseError} is an error produced by MathJax webserver.')
+            lock.release()
+                
+    else:
+        # Cleaning and Dumping the MathML strings to JSON file
+        MML = CleaningMML(res.text)
+        MML = mmlsimplification(MML)
+        
+        lock.acquire()
+        if args.verbose:
+            print(f"writing {file_name}")
+        
+        MML_output = open(os.path.join(mml_path, f"{file_name}.txt"), "w")
+        
+        #json.dump(MML, open(os.path.join(mml_path, f"{file_name}.txt"), "w"))
+        MML_output.write(MML)
+        lock.release()
 
-def Pooling(type_of_folder, dir, folder, keyword_Macro_dict, keyword_dict, Large_MML, Small_MML):
+
+def Pooling(type_of_folder, DIR, folder, keyword_Macro_dict, keyword_dict, Large_MML, Small_MML):
     
     temp = []
     
     for index, eqn in enumerate(os.listdir(type_of_folder)):
         
         if '.png' in eqn:
-            temp.append([type_of_folder, eqn, dir, folder, keyword_Macro_dict, keyword_dict, Large_MML, Small_MML])    
+            temp.append([type_of_folder, eqn, DIR, folder, keyword_Macro_dict, keyword_dict, Large_MML, Small_MML])    
     
     with Pool(multiprocessing.cpu_count()//2) as pool:
         result = pool.map(Creating_final_equations, temp)
@@ -230,54 +251,52 @@ def Pooling(type_of_folder, dir, folder, keyword_Macro_dict, keyword_dict, Large
     
 if __name__ == "__main__":
     
-    #for dir in ['1402', '1403', '1404', '1405']:
-    dir = '1402'
-    root = f"/projects/temporary/automates/er/gaurav/{dir}_results"
-    # Path to image directory
-    folder_images = os.path.join(root, "latex_images")
-    # Path to directory contain MathML eqns
-    mml_dir = os.path.join(root, "Mathjax_mml")
-    
-    #for folder in os.listdir(folder_images):
-    folder = "1402.0091"
-    # Creating folder for MathML codes for specific file
-    mml_folder = os.path.join(mml_dir, folder)
-    # Creating folder for Large and Small eqns
-    Large_MML = os.path.join(mml_folder, "Large_MML")
-    Small_MML = os.path.join(mml_folder, "Small_MML")
-    for F in [mml_folder, Large_MML, Small_MML]:
-        if not os.path.exists(F):
-            subprocess.call(['mkdir', F])
-    
-    # Creating Macros dictionary
-    #keyword_Macro_dict, keyword_dict = Creating_Macro_DMO_dictionaries(folder)
-    
-    #Appending all the eqns of the folder/paper to Latex_strs_json 
-    #along with their respective Macros and Declare Math Operator commands.
-    
-    # Creating array of final eqns
-    Large_eqns = os.path.join(folder_images, f"{folder}/Large_eqns")
-    Small_eqns = os.path.join(folder_images, f"{folder}/Small_eqns")
-    
-    # Creating Macros dictionary
-    keyword_Macro_dict, keyword_dict = Creating_Macro_DMO_dictionaries(folder)
-    
-    for type_of_folder in [Large_eqns, Small_eqns]:
+    for DIR in args.directories:
         
-        Pooling(type_of_folder, dir, folder, keyword_Macro_dict, keyword_dict, Large_MML, Small_MML)
+        src_path = args.source
+        year, DIR = str(args.year), str(DIR)
+        root = os.path.join(src_path, f'{year}/{DIR}')
         
-        # array to store pairs of [type_of_folder, folder, Large_MML, Small_MML] Will be used as arguments in pool.map            
-        
+        print('Currently running:  ',DIR)
             
+        # Path to image directory
+        folder_images = os.path.join(root, "latex_images")
+        
+        # Path to directory contain MathML eqns
+        mml_dir = os.path.join(root, "Mathjax_mml")
+        
+        for folder in os.listdir(folder_images):
             
-          
-    #print(keywords_log)
-    #print(" ")
-    #print(" ====================== Errors ======================")
-    #print(" ")
-    #print(Errors)
-    #json.dump(keywords_log, open("/projects/temporary/automates/er/gaurav/results_file/MathJax_Logs/Keywords_logs.txt", "w"))  
-    #json.dump(Errors, open("/projects/temporary/automates/er/gaurav/results_file/MathJax_Logs/Errors_logs.txt", "w"))  
+            # Creating folder for MathML codes for specific file
+            mml_folder = os.path.join(mml_dir, folder)
+            # Creating folder for Large and Small eqns
+            Large_MML = os.path.join(mml_folder, "Large_MML")
+            Small_MML = os.path.join(mml_folder, "Small_MML")
+            for F in [mml_folder, Large_MML, Small_MML]:
+                if not os.path.exists(F):
+                    subprocess.call(['mkdir', F])
+            
+            #Appending all the eqns of the folder/paper to Latex_strs_json 
+            #along with their respective Macros and Declare Math Operator commands.
+            
+            # Creating array of final eqns
+            Large_eqns = os.path.join(folder_images, f"{folder}/Large_eqns")
+            Small_eqns = os.path.join(folder_images, f"{folder}/Small_eqns")
+            
+            # Creating Macros dictionary
+            keyword_Macro_dict, keyword_dict = Creating_Macro_DMO_dictionaries(folder)
+            
+            for type_of_folder in [Large_eqns, Small_eqns]:
+                
+                Pooling(type_of_folder, DIR, folder, keyword_Macro_dict, keyword_dict, Large_MML, Small_MML)
+
+
+    # Printing stoping time
+    print(' ')
+    stop_time = datetime.now()
+    print('Stoping at:  ', stop_time)
+    print(' ')
+    print('LaTeX-MathML conversion has completed.')
 
 ######################################################################
 
