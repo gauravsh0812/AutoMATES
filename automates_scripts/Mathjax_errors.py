@@ -13,10 +13,17 @@ def main():
 
     root = '/projects/temporary/automates/er/gaurav/'
 
+<<<<<<< HEAD
     for yr in [14]:#, 15, 16, 17, 18]:
 
         year = '20' + str(yr)
 
+=======
+    for yr in [15, 16, 17, 18]:
+
+        year = '20' + str(yr)
+
+>>>>>>> 783e61c7953265991afc29b76ecd501361b42821
         print(' ==++== ' *10)
         print('Currently working on logs file of:  ', year)
 
@@ -38,6 +45,7 @@ def main():
         # ranking tokens/errors based on the total number of equations affected
         (sorted_token_counter_tuples, sorted_error_counter_tuples, top10_tokens_tuples, top10_errors_tuples) = Ranking(token_counter, error_counter)
 
+<<<<<<< HEAD
         # dumping counter dictionaries in the form of tuples ordered by values
         json.dump(sorted_token_counter_tuples, open(os.path.join(root, f'{year}/Logs/combine_logs/tokens_counter_tuples.json'),'w'))
         json.dump(Osorted_error_counter_tuples, open(os.path.join(root, f'{year}/Logs/combine_logs/errors_counter_tuples.json'), 'w'))
@@ -47,6 +55,17 @@ def main():
         # finding histogram distribution of token/error counter dictionaries
         # It helps to get an idea of the errors/tokens that are affecting most of the eqns
         Distribution(root, year, sorted_token_counter_tuples, sorted_error_counter_tuples, top10_tokens_tuples, top10_errors_tuples)
+=======
+        # dumping counter dictionaries
+        json.dump(token_counter, open(os.path.join(root, f'{year}/Logs/combine_logs/tokens_counter_dictionary.txt'),'w'))
+        json.dump(error_counter, open(os.path.join(root, f'{year}/Logs/combine_logs/errors_counter_dictionary.txt'), 'w'))
+        json.dump(token_counter, open(os.path.join(root, f'{year}/Logs/combine_logs/top50_tokens_dictionary.txt'),'w'))
+        json.dump(error_counter, open(os.path.join(root, f'{year}/Logs/combine_logs/top50_errors_dictionary.txt'), 'w'))
+
+        # finding histogram distribution of token/error counter dictionaries
+        # It helps to get an idea of the errors/tokens that are affecting most of the eqns
+        Distribution(root, year, sorted_token_counter, sorted_error_counter, top50_tokens, top50_errors)
+>>>>>>> 783e61c7953265991afc29b76ecd501361b42821
 
 
 # finding 'not working' latex eqns and respective tokens
@@ -59,7 +78,11 @@ def Mjx_errors_and_not_working_tokens(log_file):
     # tokens -- {latex_eqns:token} or errors -- {latyex_eqns:error}
     dict_token = {}
     dict_error = {}
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 783e61c7953265991afc29b76ecd501361b42821
     # defining a dictionary to keep record of the frequency of a token or error
     # {token/error: total number of equations it has affected}
     token_counter = {}
@@ -78,7 +101,7 @@ def Mjx_errors_and_not_working_tokens(log_file):
         # PART 1 -- COLLECT ALL THE 'NOT WORKING' TOKENS
         if 'is either not supported by MathJax or incorrectly written' in sentence:
 
-            #print('Part 1 --  ', line.split(':'))
+            print('Part 1 --  ', line.split(':'))
 
             eqn_path = eqn_path.replace('latex_images', 'tex_files')
             #latex_eqn = open((eqn_path+'.txt'), 'r').readlines()[0]
@@ -101,7 +124,7 @@ def Mjx_errors_and_not_working_tokens(log_file):
         # PART 2 -- COLLECT ALL THE 'ERRORS' PRODUCED BY MATHJAX SERVER
         if 'is an error produced by MathJax webserver' in sentence:
 
-            #print('Part 2 --  ', line.split(':'))
+            print('Part 2 --  ', line.split(':'))
 
             eqn_path = eqn_path.replace('latex_images', 'tex_files')
             #latex_eqn = open((eqn_path+'.txt'), 'r').readlines()[0]
