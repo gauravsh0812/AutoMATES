@@ -116,6 +116,6 @@ def json2js(json_data, output_file, Flag, var_name='eqn_src'):
         fout.write('];')
 
 
-if __name__ == 'main()':
+if __name__ == '__main()__':
     
     main()
