@@ -6,11 +6,11 @@ import json
 # re-arranging the logs
 def rearranging_logs():
 
-    root = '/projects/temporary/automates/er/gaurav'
-    year_list = [14]
+    root = '/projects/temporarty/automates/er/gaurav'
+    year_list = [18]
 
     for yr in year_list:
-        print(yr)
+
         year = '20'+str(yr)
         logs_path = os.path.join(root, f'{year}/Logs')
 
@@ -24,14 +24,17 @@ def rearranging_logs():
         os.chdir(logs_path)
         log_data = list(fileinput.input(temp))
 
-        # writing WARNINGs from log_data
-        new_log_path = os.path.join(logs_path, f'combine_logs/{year}_MathJax_MML_Log.log')
-        FILE = open(new_log_path, 'w')
+        # filtering WARNING from log_data
+        WARNING_list = list()
 
         for line in log_data:
             if line.split(':')[0] == 'WARNING':
-                FILE.write(line)
+                WARNING_list.append(line)
+
+        # re-writing list at the respective destination folder
+        new_log_path = os.path.join(logs_path, f'{year}_MathJax_MML_Log.log'}
+        with open(new_log_path, 'w') as FILE:
+            json.dump(WARNING_list, FILE)
 
 # calling rearranging_logs function
 rearranging_logs()
-
