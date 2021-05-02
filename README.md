@@ -26,8 +26,6 @@ _**automates_scripts**_ folder contain scripts to build dataset.
 
 **_Log_problem_scripts_** contain scripts to get insight of various errors I have got during the experimentation.
 
-**_modified_image2markup_** contain modified im2markup preprocessing scripts to make them workable with my dataset.  
-
 **_Docker_** contain DockerFile to create Docker Image to run im2markup model smoothly on any machine.
 
 ## Further details can be found under respective folder's README.md
