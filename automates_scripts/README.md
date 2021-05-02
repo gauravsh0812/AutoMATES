@@ -29,8 +29,6 @@ python mathml_simplification.py -src </path/to/arxiv/papers/>  -dst </path/to/de
 python etreeParser.py -src </path/to/arxiv/papers/>  -dst </path/to/destination/of/parsed_equations/>  -yr </path/to/year/folder/> -dir </path/to/specific/month/directory/>
 ```
 
-
-
 # Paths need to provide for venti(local server)
 
 -src (source_path) = '/projects/temporary/automates/arxiv/src'
@@ -52,3 +50,6 @@ python etreeParser.py -src </path/to/arxiv/papers/>  -dst </path/to/destination/
 
 -yr (year) = for example: 2014
 
+
+# Dataset visulaization
+The dataset can be visualized using the html code 
