@@ -17,3 +17,6 @@ python SLE_mathml_simplification.py -src </path/to/arxiv/papers/>  -dst </path/t
 ```
 python SLE_etreeParser.py -src </path/to/arxiv/papers/>  -dst </path/to/destination/of/parsed_equations/>  -yr </path/to/year/folder/> -dir </path/to/specific/month/directory/>
 ```
+**_html_code.py_** used to visualize the dataset in tabular format. The complimentary code to render HTML table can be found at under automates ML4AI github(https://github.com/ml4ai/automates/tree/gauravs_automates) at ```automates/scripts/equation_reading/mathjax/render_latex+mathml/```
+
+
