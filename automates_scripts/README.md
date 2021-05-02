@@ -49,7 +49,3 @@ python etreeParser.py -src </path/to/arxiv/papers/>  -dst </path/to/destination/
 -dir (List of Directories) = for example: 1401 1402 1403
 
 -yr (year) = for example: 2014
-
-
-# Dataset visulaization
-The dataset can be visualized using the html code 
