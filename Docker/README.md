@@ -15,4 +15,4 @@ To execute the other scripts in the container:
 docker exec -w <dir-to-use-as-cwd-in-docker-container> <a-name-for-your-container> [<command-agrs>]
 ```
 
-### NOTE: Due to security issues, I have removed "Pillow" package from the requirement.txt file. The person can add that before building image.
+### NOTE: Due to security issues, I have removed "Pillow" package from the requirement.txt file. One can add that before building image.
