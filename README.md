@@ -22,9 +22,9 @@ This repository consist of _Data Engineering and Preprocessing_ scripts used to 
 
 _**automates_scripts**_ folder contain scripts to build dataset.
 
-**_SLE_** contain scripts to create dataset having single lined equations required at the later stages of the project(while working with Torch(Lua) model of im2markup: https://github.com/harvardnlp/im2markup)
+**_single_line_equations_** contain scripts to create dataset having single lined equations required at the later stages of the project(while working with Torch(Lua) model of im2markup: https://github.com/harvardnlp/im2markup)
 
-**_Log_problem_scripts_** contain scripts to get insight of various errors I have got during the experimentation.
+**_log_problem_scripts_** contain scripts to get insight of various errors I have got during the experimentation.
 
 **_Docker_** contain DockerFile to create Docker Image to run im2markup model smoothly on any machine.
 
